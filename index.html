@@ -32,9 +32,8 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
 <body>
 <div class="main-box">
     <h2>🔐 全网统一Delta密钥主控系统</h2>
-    <p class="tip">登录一次永久有效 | 关闭页面/重启浏览器仍保持登录 | 管理员专属后台</p>
+    <p class="tip">登录永久留存 | 密钥7天后凌晨0点统一自动失效 | 独立时效不与Delta冲突</p>
 
-    <!-- 登录区 / 已登录状态 -->
     <div class="login-box" id="loginArea">
         <h3 style="color:#fff;margin-bottom:15px">请选择账号登录</h3>
         <button class="btn btn-google" onclick="loginGoogle()">Google登录</button>
@@ -44,17 +43,14 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
         <p style="color:#999;margin-top:15px">未登录无法使用密钥功能</p>
     </div>
 
-    <!-- 已登录显示（自动隐藏登录按钮） -->
     <div class="user-info" id="userInfo" style="display:none;">
         已登录：<span id="loginType"></span>
-        <button class="btn btn-red btn-sm" onclick="userLogout()">退出登录</button>
+        <button class="btn btn-red" onclick="userLogout()">退出登录</button>
     </div>
 
-    <!-- 管理员密码（隐藏输入） -->
     <input class="inp" id="adminPwd" type="password" placeholder="管理员密码">
     <button class="btn btn-orange" onclick="loginAdmin()">解锁后台</button>
 
-    <!-- 主内容（未登录隐藏） -->
     <div class="split hide-content" id="mainContent">
         <div class="box-left">
             <h3>📤 密钥生成区（登录可用）</h3>
@@ -80,34 +76,68 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
             <button class="btn btn-blue" onclick="refreshData()">刷新数据库</button>
             <button class="btn btn-red" onclick="clearAllData()">清空全网数据</button>
             <textarea id="dataBaseView"></textarea>
-            <p>总:<span id="allNum">0</span> | 已用:<span id="usedNum">0</span> | 封禁:<span id="banNum">0</span></p>
+            <p>总:<span id="allNum">0</span> | 已用:<span id="usedNum">0</span> | 封禁:<span id="banNum">0</span> | 已过期:<span id="outTimeNum">0</span></p>
         </div>
     </div>
 </div>
 
 <script>
-// 管理员密码
 const ADMIN_PWD = "0189597579";
+const EXPIRE_DAY = 7;
+
 let isAdmin = false;
 let isUserLogin = false;
 let loginType = "";
 
-// 本地持久化密钥
 const LOGIN_STATUS_KEY = "Delta_User_Login_Status";
 const LOGIN_TYPE_KEY = "Delta_User_Login_Type";
 
-// 全网密钥库
 let KeyDataBase = JSON.parse(localStorage.getItem("NetAllKeyData")) || {
-    allKey:[], usedKey:[], banKey:[], createTime:{}
+    allKey:[],
+    usedKey:[],
+    banKey:[],
+    outTimeKey:[],
+    createDate:{}
 };
 
 function saveNetData(){
     localStorage.setItem("NetAllKeyData", JSON.stringify(KeyDataBase));
 }
 
-// ==============================================
-// 登录状态持久化（核心）
-// ==============================================
+// 获取当天凌晨0点时间戳
+function getZeroTimeStamp(dateObj){
+    let d = new Date(dateObj);
+    return new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0).getTime();
+}
+
+// 7天后凌晨0点过期判断
+function isKeyExpired(createDateStr){
+    let createDate = new Date(createDateStr);
+    let now = new Date();
+    let createZero = getZeroTimeStamp(createDate);
+    let nowZero = getZeroTimeStamp(now);
+    let diffDay = Math.floor((nowZero - createZero) / (1000*60*60*24));
+    return diffDay >= EXPIRE_DAY;
+}
+
+// 自动清理7天凌晨0点过期密钥
+function clear7DayExpire(){
+    let newAllKey = [];
+    for(let key of KeyDataBase.allKey){
+        let cDate = KeyDataBase.createDate[key];
+        if(!cDate || !isKeyExpired(cDate)){
+            newAllKey.push(key);
+        }else{
+            if(!KeyDataBase.outTimeKey.includes(key)){
+                KeyDataBase.outTimeKey.push(key);
+            }
+        }
+    }
+    KeyDataBase.allKey = newAllKey;
+    saveNetData();
+}
+
+// 登录持久化
 function saveLoginState(type){
     localStorage.setItem(LOGIN_STATUS_KEY, "true");
     localStorage.setItem(LOGIN_TYPE_KEY, type);
@@ -133,45 +163,25 @@ function loadLoginState(){
     }
 }
 
-// ==============================================
-// 四种社交登录（登录后永久保存）
-// ==============================================
-function loginGoogle(){
-    saveLoginState("Google账号");
-    afterLogin();
-}
-function loginFacebook(){
-    saveLoginState("Facebook账号");
-    afterLogin();
-}
-function loginIns(){
-    saveLoginState("Instagram账号");
-    afterLogin();
-}
-function loginWechat(){
-    saveLoginState("微信账号");
-    afterLogin();
-}
+function loginGoogle(){saveLoginState("Google账号");afterLogin();}
+function loginFacebook(){saveLoginState("Facebook账号");afterLogin();}
+function loginIns(){saveLoginState("Instagram账号");afterLogin();}
+function loginWechat(){saveLoginState("微信账号");afterLogin();}
 function afterLogin(){
     document.getElementById("loginArea").style.display = "none";
     document.getElementById("userInfo").style.display = "block";
     document.getElementById("loginType").innerText = loginType;
     document.getElementById("mainContent").classList.remove("hide-content");
-    alert(`✅ ${loginType} 登录成功\n(关闭页面/重启浏览器仍保持登录)`);
+    alert(`✅ ${loginType} 登录成功，永久保存登录状态`);
 }
-
-// 用户退出（手动才清）
 function userLogout(){
     clearLoginState();
     document.getElementById("loginArea").style.display = "block";
     document.getElementById("userInfo").style.display = "none";
     document.getElementById("mainContent").classList.add("hide-content");
-    alert("已退出登录，下次需重新登录");
+    alert("已退出登录");
 }
 
-// ==============================================
-// 密钥功能（必须登录）
-// ==============================================
 function get32HexKey(){
     let s="0123456789abcdef",r="";
     for(let i=0;i<32;i++)r+=s[Math.floor(Math.random()*16)];
@@ -180,46 +190,53 @@ function get32HexKey(){
 function getUniqueNetKey(){
     let k;
     do{k=get32HexKey();}
-    while(KeyDataBase.allKey.includes(k)||KeyDataBase.usedKey.includes(k)||KeyDataBase.banKey.includes(k));
+    while(KeyDataBase.allKey.includes(k)||KeyDataBase.usedKey.includes(k)||KeyDataBase.banKey.includes(k)||KeyDataBase.outTimeKey.includes(k));
     return k;
 }
+
 function createOneKey(){
     if(!isUserLogin){alert("请先登录！");return;}
+    clear7DayExpire();
     let k=getUniqueNetKey();
     KeyDataBase.allKey.push(k);
-    KeyDataBase.createTime[k]=new Date().toLocaleString();
+    KeyDataBase.createDate[k] = new Date().toLocaleDateString();
     saveNetData();
     document.getElementById("keyOutput").value+=k+"\n";
     refreshData();
 }
 function createBatch(n){
     if(!isUserLogin){alert("请先登录！");return;}
+    clear7DayExpire();
     let t="";
     for(let i=0;i<n;i++){
         let k=getUniqueNetKey();
         KeyDataBase.allKey.push(k);
-        KeyDataBase.createTime[k]=new Date().toLocaleString();
+        KeyDataBase.createDate[k] = new Date().toLocaleDateString();
         t+=k+"\n";
     }
     saveNetData();
     document.getElementById("keyOutput").value+=t;
     refreshData();
 }
-function clearText(){
-    document.getElementById("keyOutput").value="";
-}
+function clearText(){document.getElementById("keyOutput").value="";}
+
 function publicCheckKey(){
     if(!isUserLogin){alert("请先登录！");return;}
+    clear7DayExpire();
     let k=document.getElementById("pubCheckKey").value.trim();
     if(!k.startsWith("FREE_")||k.replace("FREE_","").length!=32){
         alert("❌ 密钥格式错误");return;
     }
+    if(KeyDataBase.outTimeKey.includes(k)){
+        alert("❌ 密钥已满7天凌晨0点，自动过期无法使用");
+        return;
+    }
     if(KeyDataBase.banKey.includes(k)){
         alert("❌ 已被管理员封禁");
     }else if(KeyDataBase.usedKey.includes(k)){
-        alert("⚠️ 已使用失效");
+        alert("⚠️ 已使用立即失效");
     }else if(KeyDataBase.allKey.includes(k)){
-        alert("✅ 密钥有效，可激活Delta！");
+        alert("✅ 密钥有效，可正常激活Delta！");
         KeyDataBase.usedKey.push(k);
         saveNetData();refreshData();
     }else{
@@ -227,9 +244,6 @@ function publicCheckKey(){
     }
 }
 
-// ==============================================
-// 管理员后台
-// ==============================================
 function loginAdmin(){
     let p=document.getElementById("adminPwd").value.trim();
     if(p===ADMIN_PWD){
@@ -243,20 +257,22 @@ function loginAdmin(){
 }
 function checkKeyState(){
     if(!isAdmin){alert("请先登录管理员");return;}
+    clear7DayExpire();
     let k=document.getElementById("checkKeyInput").value.trim();
-    if(!k.startsWith("FREE_")||k.replace("FREE_","").length!=32){alert("格式错");return;}
-    let t=KeyDataBase.createTime[k]||"未知";
-    if(KeyDataBase.banKey.includes(k))alert(`❌ 已封禁 | ${t}`);
-    else if(KeyDataBase.usedKey.includes(k))alert(`⚠️ 已使用 | ${t}`);
-    else if(KeyDataBase.allKey.includes(k))alert(`✅ 可用 | ${t}`);
-    else alert("不存在");
+    if(!k.startsWith("FREE_")||k.replace("FREE_","").length!=32){alert("格式错误");return;}
+    let cDate=KeyDataBase.createDate[k]||"未知日期";
+    if(KeyDataBase.outTimeKey.includes(k))alert(`❌ 已满7天凌晨0点过期 | 创建日期：${cDate}`);
+    else if(KeyDataBase.banKey.includes(k))alert(`❌ 已封禁 | 创建日期：${cDate}`);
+    else if(KeyDataBase.usedKey.includes(k))alert(`⚠️ 已使用失效 | 创建日期：${cDate}`);
+    else if(KeyDataBase.allKey.includes(k))alert(`✅ 正常可用 | 创建日期：${cDate}`);
+    else alert("密钥不存在");
 }
 function blackListKey(){
     if(!isAdmin){alert("请先登录管理员");return;}
     let k=document.getElementById("checkKeyInput").value.trim();
     if(!KeyDataBase.banKey.includes(k)){
         KeyDataBase.banKey.push(k);
-        saveNetData();refreshData();alert("✅ 全网封禁");
+        saveNetData();refreshData();alert("✅ 全网封禁成功");
     }
 }
 function resetKeyState(){
@@ -264,14 +280,15 @@ function resetKeyState(){
     let k=document.getElementById("checkKeyInput").value.trim();
     KeyDataBase.usedKey=KeyDataBase.usedKey.filter(x=>x!=k);
     KeyDataBase.banKey=KeyDataBase.banKey.filter(x=>x!=k);
-    saveNetData();refreshData();alert("✅ 恢复可用");
+    KeyDataBase.outTimeKey=KeyDataBase.outTimeKey.filter(x=>x!=k);
+    saveNetData();refreshData();alert("✅ 密钥恢复可用状态");
 }
 function batchBanAllUsed(){
     if(!isAdmin){alert("请先登录管理员");return;}
-    if(confirm("确定封禁所有已用密钥？")){
+    if(confirm("确定封禁所有已使用密钥？")){
         KeyDataBase.banKey=[...new Set([...KeyDataBase.banKey,...KeyDataBase.usedKey])];
         KeyDataBase.usedKey=[];
-        saveNetData();refreshData();alert("✅ 已失效所有用过的密钥");
+        saveNetData();refreshData();alert("✅ 全部已用密钥一键失效");
     }
 }
 function refreshData(){
@@ -279,18 +296,19 @@ function refreshData(){
     document.getElementById("allNum").innerText=KeyDataBase.allKey.length;
     document.getElementById("usedNum").innerText=KeyDataBase.usedKey.length;
     document.getElementById("banNum").innerText=KeyDataBase.banKey.length;
+    document.getElementById("outTimeNum").innerText=KeyDataBase.outTimeKey.length;
 }
 function clearAllData(){
     if(!isAdmin){alert("请先登录管理员");return;}
-    if(confirm("警告：清空全网所有密钥，不可恢复！")){
-        KeyDataBase={allKey:[],usedKey:[],banKey:[],createTime:{}};
-        saveNetData();refreshData();alert("✅ 已清空全网数据");
+    if(confirm("警告：清空全网所有密钥数据，不可恢复！")){
+        KeyDataBase={allKey:[],usedKey:[],banKey:[],outTimeKey:[],createDate:{}};
+        saveNetData();refreshData();alert("✅ 全网密钥数据库已清空");
     }
 }
 
-// 页面加载时自动恢复登录
 window.onload=function(){
     loadLoginState();
+    clear7DayExpire();
     refreshData();
 }
 </script>
