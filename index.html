@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta密钥授权系统 安全防护版</title>
+<title>Delta游戏专属密钥授权系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
 body{background:#080808;color:#00ee77;padding:15px}
@@ -14,7 +14,7 @@ h2{color:#ffffff;margin:10px 0;border-bottom:1px solid #222;padding-bottom:8px}
 .btn-red{background:#c62828;color:#fff}
 .btn-green{background:#00897b;color:#fff}
 .btn-orange{background:#f59e0b;color:#fff}
-.btn-google{background:#db4437;color:#fff}
+.btn-help{background:#25D366;color:#fff}
 .inp{padding:8px;width:320px;background:#111;border:1px solid #333;color:#00ee77;outline:none;margin:5px}
 textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color:#00ee77;padding:12px;margin:10px 0;border-radius:4px}
 .split{display:flex;gap:20px;flex-wrap:wrap}
@@ -26,45 +26,55 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
 .user-info{color:#ccc;margin:5px 0;font-size:14px}
 .user-list-box{background:#111;padding:15px;border-radius:6px;margin:10px 0;max-height:200px;overflow:auto}
 .firewall-tip{color:#4cd964;font-size:13px;margin:5px 0}
+.guide-tip{color:#ffcc00;font-size:12px;text-align:left;margin:10px 0;padding:10px;background:#1a1a1a;border-radius:4px}
+.footer-help{text-align:center;margin-top:30px;padding:15px;border-top:1px solid #333;color:#ccc}
+.footer-help a{color:#25D366;text-decoration:none}
 </style>
 </head>
 <body>
 <div class="main-box">
-    <h2>🔐 Delta全网密钥授权系统</h2>
-    <p class="tip">一键快捷登录+手动注册双通道 | 固定7天凌晨0点自动过期 | 内置安全防火墙</p>
+    <h2>🔐 Delta游戏专属密钥授权系统</h2>
+    <p class="tip">必须注册游戏专属账号才能使用 | 固定7天凌晨0点自动过期 | 内置安全防火墙</p>
     <div class="firewall-tip">✅ 防火墙已启用：防篡改、防恶意刷取、防越权盗取数据</div>
 
     <div class="auth-box" id="authArea">
-        <div id="googleLoginForm">
-            <h3 style="color:#fff;margin-bottom:15px">检测到快捷登录账号</h3>
-            <button class="btn btn-google" onclick="quickGoogleLogin()">一键直接登录</button>
-            <p style="color:#999;margin-top:10px">暂无账号/未注册 → <a href="#" onclick="showManualLogin()">前往手动注册</a></p>
+        <div id="loginForm">
+            <h3 style="color:#fff;margin-bottom:15px">🎮 游戏账号登录</h3>
+            <div class="guide-tip">
+                新手引导：<br>
+                1. 如果你还没有账号 → 点击下方「注册新账号」<br>
+                2. 账号格式必须为：小写英文/数字 + @gmail.com<br>
+                例：`abc123@gmail.com`（不能有中文、大写、特殊符号）
+            </div>
+            <input class="inp" id="loginUser" placeholder="输入你的游戏账号（xxx@gmail.com）">
+            <br>
+            <input class="inp" id="loginPass" type="password" placeholder="输入你的登录密码">
+            <br>
+            <button class="btn btn-green" onclick="userLogin()">登录系统</button>
+            <p style="color:#999;margin-top:10px">还没有游戏账号？<a href="#" onclick="showRegisterForm()">立即注册</a></p>
         </div>
 
-        <div id="manualLoginForm" style="display:none;">
-            <div id="loginForm">
-                <h3 style="color:#fff;margin-bottom:15px">账号密码登录</h3>
-                <input class="inp" id="loginUser" placeholder="输入用户名">
-                <br>
-                <input class="inp" id="loginPass" type="password" placeholder="输入密码">
-                <br>
-                <button class="btn btn-green" onclick="userLogin()">登录系统</button>
-                <p style="color:#999;margin-top:10px">没有账号 <a href="#" onclick="showRegisterForm()">立即注册</a></p>
+        <div id="registerForm" style="display:none;">
+            <h3 style="color:#fff;margin-bottom:15px">📝 注册你的专属游戏账号</h3>
+            <div class="guide-tip">
+                注册规则：<br>
+                1. 账号必须以 `@gmail.com` 结尾<br>
+                2. 账号前缀只能用：小写字母(a-z)、数字(0-9)<br>
+                3. 不能包含：中文、大写字母、空格、特殊符号（如!@#$）<br>
+                ✅ 正确例子：`minecraft123@gmail.com` <br>
+                ❌ 错误例子：`我的世界@gmail.com` / `ABC123@gmail.com` / `abc!@gmail.com`
             </div>
-            <div id="registerForm" style="display:none;">
-                <h3 style="color:#fff;margin-bottom:15px">注册专属账号</h3>
-                <input class="inp" id="regUser" placeholder="设置用户名">
-                <br>
-                <input class="inp" id="regPass" type="password" placeholder="设置登录密码">
-                <br>
-                <button class="btn btn-blue" onclick="userRegister()">完成注册</button>
-                <p style="color:#999;margin-top:10px">已有账号 <a href="#" onclick="showLoginForm()">返回登录</a></p>
-            </div>
+            <input class="inp" id="regUser" placeholder="设置游戏账号（xxx@gmail.com）">
+            <br>
+            <input class="inp" id="regPass" type="password" placeholder="设置登录密码（建议6-16位）">
+            <br>
+            <button class="btn btn-blue" onclick="userRegister()">完成注册</button>
+            <p style="color:#999;margin-top:10px">已有账号？<a href="#" onclick="showLoginForm()">返回登录</a></p>
         </div>
     </div>
 
     <div class="user-info" id="userInfo" style="display:none;">
-        在线用户：<span id="currentUser"></span>
+        已登录账号：<span id="currentUser"></span>
         <button class="btn btn-red" onclick="userLogout()">退出登录</button>
     </div>
 
@@ -75,21 +85,21 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
         <div class="box-left">
             <h3>📤 密钥生成中心</h3>
             <button class="btn btn-blue" onclick="createOneKey()">生成单个密钥</button>
-            <button class="btn btn-blue" onclick="createBatch(20)">批量生成20</button>
-            <button class="btn btn-blue" onclick="createBatch(100)">批量生成100</button>
+            <button class="btn btn-blue" onclick="createBatch(20)">批量生成20个</button>
+            <button class="btn btn-blue" onclick="createBatch(100)">批量生成100个</button>
             <button class="btn btn-red" onclick="clearText()">清空输出</button>
-            <textarea id="keyOutput" placeholder="生成的有效密钥自动显示此处"></textarea>
+            <textarea id="keyOutput" placeholder="生成的有效密钥将显示在这里，格式为 FREE_32位十六进制字符"></textarea>
 
-            <h3>🔍 密钥有效性验证</h3>
-            <input class="inp" id="pubCheckKey" placeholder="粘贴密钥进行验证">
+            <h3>🔍 密钥有效性验证（可直接用于Delta激活）</h3>
+            <input class="inp" id="pubCheckKey" placeholder="粘贴你的密钥进行验证">
             <button class="btn btn-green" onclick="publicCheckKey()">验证是否可用</button>
         </div>
 
         <div class="box-right admin-hide" id="adminPanel">
             <h3>⚙️ 超级管理员后台</h3>
-            <button class="btn btn-green" onclick="showAllUserList()">查看全部注册用户</button>
+            <button class="btn btn-green" onclick="showAllUserList()">查看全部注册游戏账号</button>
             <div class="user-list-box" id="userListBox"></div>
-            <input class="inp" id="checkKeyInput" placeholder="输入密钥管理">
+            <input class="inp" id="checkKeyInput" placeholder="输入密钥进行管理">
             <br>
             <button class="btn btn-green" onclick="checkKeyState()">查询密钥状态</button>
             <button class="btn btn-red" onclick="blackListKey()">封禁违规密钥</button>
@@ -100,22 +110,31 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
             <p>总密钥:<span id="allNum">0</span> | 已使用:<span id="usedNum">0</span> | 已封禁:<span id="banNum">0</span> | 已过期:<span id="outTimeNum">0</span></p>
         </div>
     </div>
+
+    <!-- 帮助/问题反馈入口 -->
+    <div class="footer-help">
+        <button class="btn btn-help" onclick="openWhatsAppHelp()">📞 联系客服/反馈问题</button>
+        <p style="font-size:12px;color:#999;margin-top:10px">遇到任何问题，点击按钮直接联系管理员</p>
+    </div>
 </div>
 
 <script>
+// ===================== 基础全局配置 =====================
 const ADMIN_PWD = "0189597579";
 const EXPIRE_DAY = 7;
 const MAX_BATCH_RATE = 5;
+const WHATSAPP_NUMBER = "0189597579";
 let isAdmin = false;
 let isUserLogin = false;
 let currentUser = "";
 let clickCount = 0;
 let lastClickTime = 0;
 
-const LOGIN_STATUS_KEY = "Delta_Safe_Login_Status";
-const LOGIN_USER_KEY = "Delta_Safe_Current_User";
-const SAFE_KEY = "FireWall_Protect_2026";
+const LOGIN_STATUS_KEY = "Delta_Game_Login_Status";
+const LOGIN_USER_KEY = "Delta_Game_Current_User";
+const SAFE_KEY = "FireWall_Game_2026";
 
+// 数据加密存储前缀
 function safeSetItem(key,val){
     localStorage.setItem(SAFE_KEY+key,val);
 }
@@ -134,6 +153,7 @@ let UserList = JSON.parse(safeGetItem("AllUserList")) || [];
 function saveNetData(){safeSetItem("NetKeyData",JSON.stringify(KeyDataBase));}
 function saveUserList(){safeSetItem("AllUserList",JSON.stringify(UserList));}
 
+// ===================== 防火墙安全拦截规则 =====================
 function firewallLimitCheck(){
     let now = Date.now();
     if(now - lastClickTime < 800){
@@ -148,27 +168,35 @@ function firewallLimitCheck(){
     lastClickTime = now;
     return true;
 }
-function illegalCharFilter(str){
-    return str.replace(/[<>{};'"\$%&]/g,"");
+
+// ===================== 账号格式校验（严格Gmail格式） =====================
+function validateGameAccount(account){
+    // 必须包含 @gmail.com 结尾
+    if(!account.endsWith("@gmail.com")){
+        return {valid:false,msg:"账号必须以 @gmail.com 结尾，例如：abc123@gmail.com"};
+    }
+    // 提取前缀部分
+    let prefix = account.replace("@gmail.com","");
+    // 前缀长度限制（4-20位）
+    if(prefix.length < 4 || prefix.length > 20){
+        return {valid:false,msg:"账号前缀长度必须在4-20位之间"};
+    }
+    // 只能包含小写字母(a-z)和数字(0-9)
+    if(!/^[a-z0-9]+$/.test(prefix)){
+        return {valid:false,msg:"账号只能包含小写英文字母和数字，不能有中文、大写字母或特殊符号"};
+    }
+    return {valid:true};
 }
 
-function quickGoogleLogin(){
-    if(!firewallLimitCheck())return;
-    let uName = "快捷登录用户_"+Math.random().toString(36).slice(2,9);
-    safeSetItem(LOGIN_STATUS_KEY,"true");
-    safeSetItem(LOGIN_USER_KEY,uName);
-    isUserLogin = true;
-    currentUser = uName;
-    document.getElementById("authArea").style.display = "none";
-    document.getElementById("userInfo").style.display = "block";
-    document.getElementById("currentUser").innerText = uName;
-    document.getElementById("mainContent").classList.remove("hide-content");
-    alert("✅ 快捷登录成功，防火墙已全程防护");
+// ===================== 帮助/反馈跳转WhatsApp =====================
+function openWhatsAppHelp(){
+    // 预设消息：自动带上固定文本，用户只需补充问题
+    const preMsg = encodeURIComponent("我遇到了问题：（请写上你的问题）");
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${preMsg}`;
+    window.open(url, '_blank');
 }
-function showManualLogin(){
-    document.getElementById("googleLoginForm").style.display = "none";
-    document.getElementById("manualLoginForm").style.display = "block";
-}
+
+// ===================== 登录/注册流程 =====================
 function showRegisterForm(){
     document.getElementById("loginForm").style.display = "none";
     document.getElementById("registerForm").style.display = "block";
@@ -179,21 +207,47 @@ function showLoginForm(){
 }
 function userRegister(){
     if(!firewallLimitCheck())return;
-    let user = illegalCharFilter(document.getElementById("regUser").value.trim());
-    let pass = illegalCharFilter(document.getElementById("regPass").value.trim());
-    if(!user||!pass){alert("账号密码不能为空");return;}
-    if(UserList.some(x=>x.user===user)){alert("用户名已存在");return;}
+    let user = document.getElementById("regUser").value.trim().toLowerCase();
+    let pass = document.getElementById("regPass").value.trim();
+    
+    // 账号格式校验
+    let validation = validateGameAccount(user);
+    if(!validation.valid){
+        alert("❌ 账号格式错误：" + validation.msg);
+        return;
+    }
+    if(!pass || pass.length < 6){
+        alert("❌ 密码不能为空，且长度不能少于6位");
+        return;
+    }
+    // 检查账号是否已存在
+    if(UserList.some(x=>x.user===user)){
+        alert("❌ 该游戏账号已被注册，请换一个账号！");
+        return;
+    }
+    // 注册成功
     UserList.push({user:user,pwd:pass,regTime:new Date().toLocaleString()});
     saveUserList();
-    alert("✅ 注册成功，请返回登录");
+    alert("✅ 游戏账号注册成功！请返回登录");
     showLoginForm();
 }
 function userLogin(){
     if(!firewallLimitCheck())return;
-    let user = illegalCharFilter(document.getElementById("loginUser").value.trim());
-    let pass = illegalCharFilter(document.getElementById("loginPass").value.trim());
-    let find = UserList.find(x=>x.user===user&&x.pwd===pass);
-    if(!find){alert("账号或密码错误");return;}
+    let user = document.getElementById("loginUser").value.trim().toLowerCase();
+    let pass = document.getElementById("loginPass").value.trim();
+    // 账号格式校验
+    let validation = validateGameAccount(user);
+    if(!validation.valid){
+        alert("❌ 账号格式错误：" + validation.msg);
+        return;
+    }
+    // 检查账号密码是否匹配
+    let found = UserList.find(x=>x.user===user && x.pwd===pass);
+    if(!found){
+        alert("❌ 游戏账号或密码错误");
+        return;
+    }
+    // 登录成功，保存状态
     safeSetItem(LOGIN_STATUS_KEY,"true");
     safeSetItem(LOGIN_USER_KEY,user);
     isUserLogin = true;
@@ -202,7 +256,7 @@ function userLogin(){
     document.getElementById("userInfo").style.display = "block";
     document.getElementById("currentUser").innerText = user;
     document.getElementById("mainContent").classList.remove("hide-content");
-    alert("✅ 登录成功，安全防护已开启");
+    alert("✅ 登录成功！安全防护已开启，可正常使用密钥功能");
 }
 function userLogout(){
     safeRemoveItem(LOGIN_STATUS_KEY);
@@ -212,10 +266,10 @@ function userLogout(){
     document.getElementById("userInfo").style.display = "none";
     document.getElementById("mainContent").classList.add("hide-content");
     document.getElementById("adminPanel").style.display = "none";
-    document.getElementById("googleLoginForm").style.display = "block";
-    document.getElementById("manualLoginForm").style.display = "none";
+    showLoginForm();
     alert("已安全退出登录");
 }
+// 恢复登录状态
 function loadLoginState(){
     let stat = safeGetItem(LOGIN_STATUS_KEY);
     let user = safeGetItem(LOGIN_USER_KEY);
@@ -228,6 +282,7 @@ function loadLoginState(){
     }
 }
 
+// ===================== 7天凌晨0点过期逻辑 =====================
 function getZeroTimeStamp(d){
     let t=new Date(d);
     return new Date(t.getFullYear(),t.getMonth(),t.getDate(),0,0,0).getTime();
@@ -251,6 +306,7 @@ function clearOverdueKey(){
     saveNetData();
 }
 
+// ===================== 密钥生成/验证逻辑 =====================
 function getRandKey(){
     let str="0123456789abcdef",res="";
     for(let i=0;i<32;i++)res+=str[Math.floor(Math.random()*16)];
@@ -263,7 +319,7 @@ function getUniqueKey(){
     return k;
 }
 function createOneKey(){
-    if(!isUserLogin){alert("请先登录");return;}
+    if(!isUserLogin){alert("请先登录游戏账号！");return;}
     if(!firewallLimitCheck())return;
     clearOverdueKey();
     let k=getUniqueKey();
@@ -274,7 +330,7 @@ function createOneKey(){
     refreshData();
 }
 function createBatch(num){
-    if(!isUserLogin){alert("请先登录");return;}
+    if(!isUserLogin){alert("请先登录游戏账号！");return;}
     if(!firewallLimitCheck())return;
     clearOverdueKey();
     let txt="";
@@ -289,9 +345,8 @@ function createBatch(num){
     refreshData();
 }
 function clearText(){document.getElementById("keyOutput").value="";}
-
 function publicCheckKey(){
-    if(!isUserLogin){alert("请先登录");return;}
+    if(!isUserLogin){alert("请先登录游戏账号！");return;}
     if(!firewallLimitCheck())return;
     clearOverdueKey();
     let k=document.getElementById("pubCheckKey").value.trim();
@@ -299,7 +354,7 @@ function publicCheckKey(){
         alert("❌ 密钥格式非法，防火墙已拦截");return;
     }
     if(KeyDataBase.outTimeKey.includes(k)){
-        alert("❌ 已满7天凌晨0点自动过期，无法使用");return;
+        alert("❌ 密钥已满7天凌晨0点自动过期，无法使用");return;
     }
     if(KeyDataBase.banKey.includes(k))alert("❌ 此密钥已被管理员封禁");
     else if(KeyDataBase.usedKey.includes(k))alert("⚠️ 密钥已使用立即失效");
@@ -310,6 +365,7 @@ function publicCheckKey(){
     }else alert("❌ 无效不存在密钥");
 }
 
+// ===================== 管理员后台 =====================
 function loginAdmin(){
     let p=document.getElementById("adminPwd").value.trim();
     if(p===ADMIN_PWD){
@@ -322,7 +378,7 @@ function loginAdmin(){
 function showAllUserList(){
     if(!isAdmin){alert("仅限管理员查看");return;}
     let html="";
-    if(UserList.length===0)html="<p style='color:#999'>暂无任何注册用户</p>";
+    if(UserList.length===0)html="<p style='color:#999'>暂无任何注册游戏账号</p>";
     else{
         UserList.forEach((item,idx)=>{
             html+=`<p>${idx+1}. 账号：${item.user} | 注册时间：${item.regTime}</p>`;
