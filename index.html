@@ -27,7 +27,8 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
     <h2>🔐 全网统一Delta密钥主控系统</h2>
     <p class="tip">访客仅可生成&验证密钥 | 管理员输入密码解锁全部管控权限</p>
 
-    <input class="inp" id="adminPwd" placeholder="输入管理员密码进入主控后台" value="123456">
+    <!-- 修复：type="password" 隐藏输入内容，默认不填 -->
+    <input class="inp" id="adminPwd" type="password" placeholder="输入管理员密码进入主控后台">
     <button class="btn btn-orange" onclick="loginAdmin()">解锁管理员权限</button>
 
     <div class="split">
@@ -63,8 +64,8 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
 </div>
 
 <script>
-// ========== 全局统一全网数据库 ==========
-const ADMIN_PWD = "123456"; // 自行修改管理员密码
+// ========== 1. 修改管理员密码为你指定的 0189597579 ==========
+const ADMIN_PWD = "0189597579"; 
 let isAdmin = false;
 let KeyDataBase = JSON.parse(localStorage.getItem("NetAllKeyData")) || {
     allKey:[],
@@ -234,4 +235,4 @@ window.onload = function(){
 }
 </script>
 </body>
-</html
+</html>
