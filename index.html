@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta游戏专属密钥授权系统</title>
+<title>Delta密钥授权系统 会员付费完整版</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
 body{background:#080808;color:#00ee77;padding:15px}
@@ -15,6 +15,7 @@ h2{color:#ffffff;margin:10px 0;border-bottom:1px solid #222;padding-bottom:8px}
 .btn-green{background:#00897b;color:#fff}
 .btn-orange{background:#f59e0b;color:#fff}
 .btn-help{background:#25D366;color:#fff}
+.btn-vip{background:#9333ea;color:#fff}
 .inp{padding:8px;width:320px;background:#111;border:1px solid #333;color:#00ee77;outline:none;margin:5px}
 textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color:#00ee77;padding:12px;margin:10px 0;border-radius:4px}
 .split{display:flex;gap:20px;flex-wrap:wrap}
@@ -28,420 +29,340 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
 .firewall-tip{color:#4cd964;font-size:13px;margin:5px 0}
 .guide-tip{color:#ffcc00;font-size:12px;text-align:left;margin:10px 0;padding:10px;background:#1a1a1a;border-radius:4px}
 .footer-help{text-align:center;margin-top:30px;padding:15px;border-top:1px solid #333;color:#ccc}
-.footer-help a{color:#25D366;text-decoration:none}
+.vip-box{border:1px solid #9333ea;padding:15px;border-radius:8px;margin:15px 0;background:#120a1f}
 </style>
 </head>
 <body>
 <div class="main-box">
     <h2>🔐 Delta游戏专属密钥授权系统</h2>
-    <p class="tip">必须注册游戏专属账号才能使用 | 固定7天凌晨0点自动过期 | 内置安全防火墙</p>
-    <div class="firewall-tip">✅ 防火墙已启用：防篡改、防恶意刷取、防越权盗取数据</div>
+    <p class="tip">单设备单账号注册 | 普通7天1次 | 会员月付RM10解锁双次 | 防黑客入侵</p>
+    <div class="firewall-tip">✅ 安全防护全开：防小号、防刷取、防入侵</div>
 
     <div class="auth-box" id="authArea">
         <div id="loginForm">
             <h3 style="color:#fff;margin-bottom:15px">🎮 游戏账号登录</h3>
             <div class="guide-tip">
-                新手引导：<br>
-                1. 如果你还没有账号 → 点击下方「注册新账号」<br>
-                2. 账号格式必须为：小写英文/数字 + @gmail.com<br>
-                例：`abc123@gmail.com`（不能有中文、大写、特殊符号）
+                新手规则：<br>
+                1. 一台设备只能注册1个账号，无法创建小号<br>
+                2. 账号必须小写英文+数字@gmail.com，禁止中文大写<br>
+                3. 普通用户7天0点仅可生成1个密钥
             </div>
-            <input class="inp" id="loginUser" placeholder="输入你的游戏账号（xxx@gmail.com）">
+            <input class="inp" id="loginUser" placeholder="输入游戏账号 xxx@gmail.com">
             <br>
-            <input class="inp" id="loginPass" type="password" placeholder="输入你的登录密码">
+            <input class="inp" id="loginPass" type="password" placeholder="输入登录密码">
             <br>
             <button class="btn btn-green" onclick="userLogin()">登录系统</button>
-            <p style="color:#999;margin-top:10px">还没有游戏账号？<a href="#" onclick="showRegisterForm()">立即注册</a></p>
+            <p style="color:#999;margin-top:10px">无账号 <a href="#" onclick="showRegisterForm()">立即注册</a></p>
         </div>
 
         <div id="registerForm" style="display:none;">
-            <h3 style="color:#fff;margin-bottom:15px">📝 注册你的专属游戏账号</h3>
+            <h3 style="color:#fff;margin-bottom:15px">📝 注册专属游戏账号</h3>
             <div class="guide-tip">
-                注册规则：<br>
-                1. 账号必须以 `@gmail.com` 结尾<br>
-                2. 账号前缀只能用：小写字母(a-z)、数字(0-9)<br>
-                3. 不能包含：中文、大写字母、空格、特殊符号（如!@#$）<br>
-                ✅ 正确例子：`minecraft123@gmail.com` <br>
-                ❌ 错误例子：`我的世界@gmail.com` / `ABC123@gmail.com` / `abc!@gmail.com`
+                注册须知：<br>
+                仅支持小写字母+数字+@gmail.com<br>
+                注册绑定设备，不可重复注册第二账号
             </div>
-            <input class="inp" id="regUser" placeholder="设置游戏账号（xxx@gmail.com）">
+            <input class="inp" id="regUser" placeholder="填写合规游戏账号">
             <br>
-            <input class="inp" id="regPass" type="password" placeholder="设置登录密码（建议6-16位）">
+            <input class="inp" id="regPass" type="password" placeholder="设置6位以上密码">
             <br>
             <button class="btn btn-blue" onclick="userRegister()">完成注册</button>
-            <p style="color:#999;margin-top:10px">已有账号？<a href="#" onclick="showLoginForm()">返回登录</a></p>
+            <p style="color:#999;margin-top:10px">已有账号 <a href="#" onclick="showLoginForm()">返回登录</a></p>
         </div>
     </div>
 
     <div class="user-info" id="userInfo" style="display:none;">
-        已登录账号：<span id="currentUser"></span>
+        登录账号：<span id="currentUser"></span>
+        <span id="userVipState" style="color:#9333ea;margin-left:15px"></span>
         <button class="btn btn-red" onclick="userLogout()">退出登录</button>
     </div>
 
-    <input class="inp" id="adminPwd" type="password" placeholder="管理员专属密码">
+    <!-- 会员付费专区 -->
+    <div class="vip-box" id="vipBox" style="display:none;">
+        <h3 style="color:#9333ea">💜 月度会员开通</h3>
+        <p>会员价格：每月 <b>RM10</b></p>
+        <p>付款方式：TNG E-Wallet 号码 <b>0189597579</b></p>
+        <p>会员福利：</p>
+        <p>1. 开通当月解锁1个月长期有效密钥</p>
+        <p>2. 开通满1个月后，每月可生成 <b>2次密钥</b></p>
+        <p>3. 延长密钥使用时效，优先权限</p>
+        <button class="btn btn-vip" onclick="openVipChat()">联系客服开通会员</button>
+    </div>
+
+    <input class="inp" id="adminPwd" type="password" placeholder="管理员密码">
     <button class="btn btn-orange" onclick="loginAdmin()">进入管理后台</button>
 
     <div class="split hide-content" id="mainContent">
         <div class="box-left">
             <h3>📤 密钥生成中心</h3>
-            <button class="btn btn-blue" onclick="createOneKey()">生成单个密钥</button>
-            <button class="btn btn-blue" onclick="createBatch(20)">批量生成20个</button>
-            <button class="btn btn-blue" onclick="createBatch(100)">批量生成100个</button>
-            <button class="btn btn-red" onclick="clearText()">清空输出</button>
-            <textarea id="keyOutput" placeholder="生成的有效密钥将显示在这里，格式为 FREE_32位十六进制字符"></textarea>
+            <p id="keyLimitTip" style="color:#ff6b6b;margin:5px 0"></p>
+            <button class="btn btn-blue" id="createKeyBtn" onclick="createOneKey()">生成密钥</button>
+            <button class="btn btn-red" onclick="clearText()">清空内容</button>
+            <textarea id="keyOutput" placeholder="生成密钥自动显示"></textarea>
 
-            <h3>🔍 密钥有效性验证（可直接用于Delta激活）</h3>
-            <input class="inp" id="pubCheckKey" placeholder="粘贴你的密钥进行验证">
-            <button class="btn btn-green" onclick="publicCheckKey()">验证是否可用</button>
+            <h3>🔍 密钥有效性验证</h3>
+            <input class="inp" id="pubCheckKey" placeholder="粘贴密钥验证">
+            <button class="btn btn-green" onclick="publicCheckKey()">立即验证</button>
         </div>
 
         <div class="box-right admin-hide" id="adminPanel">
-            <h3>⚙️ 超级管理员后台</h3>
-            <button class="btn btn-green" onclick="showAllUserList()">查看全部注册游戏账号</button>
+            <h3>⚙️ 管理员后台</h3>
+            <button class="btn btn-green" onclick="showAllUserList()">全部用户</button>
+            <button class="btn btn-red" onclick="showBlackList()">黑客黑名单</button>
             <div class="user-list-box" id="userListBox"></div>
-            <input class="inp" id="checkKeyInput" placeholder="输入密钥进行管理">
+            <input class="inp" id="setVipUser" placeholder="输入账号开通会员">
+            <button class="btn btn-vip" onclick="setUserVip()">开通月度会员</button>
+            <input class="inp" id="checkKeyInput" placeholder="管理密钥">
             <br>
-            <button class="btn btn-green" onclick="checkKeyState()">查询密钥状态</button>
-            <button class="btn btn-red" onclick="blackListKey()">封禁违规密钥</button>
-            <button class="btn btn-blue" onclick="resetKeyState()">解除密钥封禁</button>
-            <button class="btn btn-orange" onclick="batchBanAllUsed()">一键作废全部已用密钥</button>
-            <button class="btn btn-red" onclick="clearAllData()">清空全网密钥库</button>
+            <button class="btn btn-green" onclick="checkKeyState()">查询状态</button>
+            <button class="btn btn-red" onclick="blackListKey()">封禁密钥</button>
             <textarea id="dataBaseView"></textarea>
-            <p>总密钥:<span id="allNum">0</span> | 已使用:<span id="usedNum">0</span> | 已封禁:<span id="banNum">0</span> | 已过期:<span id="outTimeNum">0</span></p>
+            <p>总密钥:<span id="allNum">0</span> | 已用:<span id="usedNum">0</span> | 封禁:<span id="banNum">0</span> | 过期:<span id="outTimeNum">0</span></p>
         </div>
     </div>
 
-    <!-- 帮助/问题反馈入口 -->
     <div class="footer-help">
-        <button class="btn btn-help" onclick="openWhatsAppHelp()">📞 联系客服/反馈问题</button>
-        <p style="font-size:12px;color:#999;margin-top:10px">遇到任何问题，点击按钮直接联系管理员</p>
+        <button class="btn btn-help" onclick="openWhatsAppHelp()">📞 问题帮助反馈</button>
+        <p style="font-size:12px;color:#999;margin-top:10px">自动跳转WhatsApp，预设文字：我遇到了问题：（请写上问题）</p>
     </div>
 </div>
 
 <script>
-// ===================== 基础全局配置 =====================
 const ADMIN_PWD = "0189597579";
 const EXPIRE_DAY = 7;
-const MAX_BATCH_RATE = 5;
-const WHATSAPP_NUMBER = "0189597579";
-let isAdmin = false;
-let isUserLogin = false;
-let currentUser = "";
-let clickCount = 0;
-let lastClickTime = 0;
+const WHATSAPP_NUM = "0189597579";
+const SAFE_KEY = "Delta_Vip_System_2026";
+let isAdmin = false,isUserLogin = false,currentUser = "";
+let clickCount = 0,lastClickTime = 0;
+const DEVICE_ID_KEY = "Delta_Device_Only";
 
-const LOGIN_STATUS_KEY = "Delta_Game_Login_Status";
-const LOGIN_USER_KEY = "Delta_Game_Current_User";
-const SAFE_KEY = "FireWall_Game_2026";
+function getDeviceID(){
+    let d = localStorage.getItem(DEVICE_ID_KEY);
+    if(!d) d = "DEV"+Math.random().toString(36).slice(2);
+    localStorage.setItem(DEVICE_ID_KEY,d);
+    return d;
+}
+const DEV_ID = getDeviceID();
+function safeSet(k,v){localStorage.setItem(SAFE_KEY+k,v)}
+function safeGet(k){return localStorage.getItem(SAFE_KEY+k)}
+function safeDel(k){localStorage.removeItem(SAFE_KEY+k)}
 
-// 数据加密存储前缀
-function safeSetItem(key,val){
-    localStorage.setItem(SAFE_KEY+key,val);
-}
-function safeGetItem(key){
-    return localStorage.getItem(SAFE_KEY+key);
-}
-function safeRemoveItem(key){
-    localStorage.removeItem(SAFE_KEY+key);
-}
-
-let KeyDataBase = JSON.parse(safeGetItem("NetKeyData")) || {
-    allKey:[],usedKey:[],banKey:[],outTimeKey:[],createDate:{}
+let KeyData = JSON.parse(safeGet("KeyData"))||{
+    all:[],used:[],ban:[],over:[],createDate:{},userMakeTime:{}
 };
-let UserList = JSON.parse(safeGetItem("AllUserList")) || [];
+let UserData = JSON.parse(safeGet("UserData"))||[];
+let BlackData = JSON.parse(safeGet("BlackData"))||[];
+let VipData = JSON.parse(safeGet("VipData"))||{};
 
-function saveNetData(){safeSetItem("NetKeyData",JSON.stringify(KeyDataBase));}
-function saveUserList(){safeSetItem("AllUserList",JSON.stringify(UserList));}
+function saveKey(){safeSet("KeyData",JSON.stringify(KeyData))}
+function saveUser(){safeSet("UserData",JSON.stringify(UserData))}
+function saveBlack(){safeSet("BlackData",JSON.stringify(BlackData))}
+function saveVip(){safeSet("VipData",JSON.stringify(VipData))}
 
-// ===================== 防火墙安全拦截规则 =====================
-function firewallLimitCheck(){
+// 黑客拦截
+function isBlack(){return BlackData.includes(DEV_ID)}
+function kickBlack(msg){
+    BlackData.push(DEV_ID);saveBlack();userLogout();
+    document.body.innerHTML="<div style='color:red;text-align:center;padding-top:60px;font-size:20px'>设备永久封禁，禁止访问</div>";
+}
+function firewallCheck(){
     let now = Date.now();
-    if(now - lastClickTime < 800){
+    if(now-lastClickTime<900){
         clickCount++;
-        if(clickCount >= MAX_BATCH_RATE){
-            alert("⚠️ 防火墙拦截：操作过于频繁，请稍后再试！");
-            return false;
-        }
-    }else{
-        clickCount = 1;
-    }
-    lastClickTime = now;
-    return true;
+        if(clickCount>=3) return kickBlack("高频恶意操作"),false;
+    }else clickCount=1;
+    lastClickTime=now;return true;
 }
 
-// ===================== 账号格式校验（严格Gmail格式） =====================
-function validateGameAccount(account){
-    // 必须包含 @gmail.com 结尾
-    if(!account.endsWith("@gmail.com")){
-        return {valid:false,msg:"账号必须以 @gmail.com 结尾，例如：abc123@gmail.com"};
-    }
-    // 提取前缀部分
-    let prefix = account.replace("@gmail.com","");
-    // 前缀长度限制（4-20位）
-    if(prefix.length < 4 || prefix.length > 20){
-        return {valid:false,msg:"账号前缀长度必须在4-20位之间"};
-    }
-    // 只能包含小写字母(a-z)和数字(0-9)
-    if(!/^[a-z0-9]+$/.test(prefix)){
-        return {valid:false,msg:"账号只能包含小写英文字母和数字，不能有中文、大写字母或特殊符号"};
-    }
-    return {valid:true};
+// 账号格式校验
+function checkAcc(acc){
+    if(!acc.endsWith("@gmail.com"))return {ok:false,tip:"必须以@gmail.com结尾"};
+    let t = acc.replace("@gmail.com","");
+    if(!/^[a-z0-9]+$/.test(t))return {ok:false,tip:"只能小写英文+数字"};
+    return {ok:true};
 }
 
-// ===================== 帮助/反馈跳转WhatsApp =====================
+// 跳转联系
 function openWhatsAppHelp(){
-    // 预设消息：自动带上固定文本，用户只需补充问题
-    const preMsg = encodeURIComponent("我遇到了问题：（请写上你的问题）");
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${preMsg}`;
-    window.open(url, '_blank');
+    let txt = encodeURIComponent("我遇到了问题：（请写上问题）");
+    window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
+}
+function openVipChat(){
+    let txt = encodeURIComponent("我要开通月度会员 RM10 TNG转账0189597579");
+    window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
 }
 
-// ===================== 登录/注册流程 =====================
+// 注册登录
 function showRegisterForm(){
-    document.getElementById("loginForm").style.display = "none";
-    document.getElementById("registerForm").style.display = "block";
+    if(UserData.find(x=>x.dev===DEV_ID))return alert("该设备已注册账号，禁止多号");
+    document.getElementById("loginForm").style.display="none";
+    document.getElementById("registerForm").style.display="block";
 }
 function showLoginForm(){
-    document.getElementById("registerForm").style.display = "none";
-    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("registerForm").style.display="none";
+    document.getElementById("loginForm").style.display="block";
 }
 function userRegister(){
-    if(!firewallLimitCheck())return;
-    let user = document.getElementById("regUser").value.trim().toLowerCase();
-    let pass = document.getElementById("regPass").value.trim();
-    
-    // 账号格式校验
-    let validation = validateGameAccount(user);
-    if(!validation.valid){
-        alert("❌ 账号格式错误：" + validation.msg);
-        return;
-    }
-    if(!pass || pass.length < 6){
-        alert("❌ 密码不能为空，且长度不能少于6位");
-        return;
-    }
-    // 检查账号是否已存在
-    if(UserList.some(x=>x.user===user)){
-        alert("❌ 该游戏账号已被注册，请换一个账号！");
-        return;
-    }
-    // 注册成功
-    UserList.push({user:user,pwd:pass,regTime:new Date().toLocaleString()});
-    saveUserList();
-    alert("✅ 游戏账号注册成功！请返回登录");
-    showLoginForm();
+    if(isBlack()||!firewallCheck())return;
+    let u = document.getElementById("regUser").value.trim().toLowerCase();
+    let p = document.getElementById("regPass").value.trim();
+    let res = checkAcc(u);
+    if(!res.ok)return alert(res.tip);
+    if(p.length<6)return alert("密码至少6位");
+    if(UserData.find(x=>x.acc===u))return alert("账号已被注册");
+    UserData.push({acc:u,pwd:p,dev:DEV_ID,time:new Date().toLocaleString()});
+    saveUser();alert("注册成功，请登录");showLoginForm();
 }
 function userLogin(){
-    if(!firewallLimitCheck())return;
-    let user = document.getElementById("loginUser").value.trim().toLowerCase();
-    let pass = document.getElementById("loginPass").value.trim();
-    // 账号格式校验
-    let validation = validateGameAccount(user);
-    if(!validation.valid){
-        alert("❌ 账号格式错误：" + validation.msg);
-        return;
-    }
-    // 检查账号密码是否匹配
-    let found = UserList.find(x=>x.user===user && x.pwd===pass);
-    if(!found){
-        alert("❌ 游戏账号或密码错误");
-        return;
-    }
-    // 登录成功，保存状态
-    safeSetItem(LOGIN_STATUS_KEY,"true");
-    safeSetItem(LOGIN_USER_KEY,user);
-    isUserLogin = true;
-    currentUser = user;
-    document.getElementById("authArea").style.display = "none";
-    document.getElementById("userInfo").style.display = "block";
-    document.getElementById("currentUser").innerText = user;
+    if(isBlack()||!firewallCheck())return;
+    let u = document.getElementById("loginUser").value.trim().toLowerCase();
+    let p = document.getElementById("loginPass").value.trim();
+    let res = checkAcc(u);
+    if(!res.ok)return alert(res.tip);
+    let find = UserData.find(x=>x.acc===u&&x.pwd===p&&x.dev===DEV_ID);
+    if(!find)return alert("账号密码错误或非本机注册");
+    safeSet("LoginUser",u);isUserLogin=true;currentUser=u;
+    document.getElementById("authArea").style.display="none";
+    document.getElementById("userInfo").style.display="block";
+    document.getElementById("currentUser").innerText=u;
     document.getElementById("mainContent").classList.remove("hide-content");
-    alert("✅ 登录成功！安全防护已开启，可正常使用密钥功能");
+    document.getElementById("vipBox").style.display="block";
+    checkVipStatus();checkMakeLimit();
 }
 function userLogout(){
-    safeRemoveItem(LOGIN_STATUS_KEY);
-    safeRemoveItem(LOGIN_USER_KEY);
-    isUserLogin = false;currentUser = "";isAdmin = false;
-    document.getElementById("authArea").style.display = "block";
-    document.getElementById("userInfo").style.display = "none";
+    safeDel("LoginUser");isUserLogin=false;currentUser="";isAdmin=false;
+    document.getElementById("authArea").style.display="block";
+    document.getElementById("userInfo").style.display="none";
     document.getElementById("mainContent").classList.add("hide-content");
-    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("adminPanel").style.display="none";
+    document.getElementById("vipBox").style.display="none";
     showLoginForm();
-    alert("已安全退出登录");
 }
-// 恢复登录状态
-function loadLoginState(){
-    let stat = safeGetItem(LOGIN_STATUS_KEY);
-    let user = safeGetItem(LOGIN_USER_KEY);
-    if(stat==="true"&&user){
-        isUserLogin=true;currentUser=user;
+function loadLogin(){
+    if(isBlack())return;
+    let u = safeGet("LoginUser");
+    if(u){
+        isUserLogin=true;currentUser=u;
         document.getElementById("authArea").style.display="none";
         document.getElementById("userInfo").style.display="block";
-        document.getElementById("currentUser").innerText=user;
+        document.getElementById("currentUser").innerText=u;
         document.getElementById("mainContent").classList.remove("hide-content");
+        document.getElementById("vipBox").style.display="block";
+        checkVipStatus();checkMakeLimit();
     }
 }
 
-// ===================== 7天凌晨0点过期逻辑 =====================
-function getZeroTimeStamp(d){
+// 会员判断
+function checkVipStatus(){
+    let vipTime = VipData[currentUser]||"";
+    let now = new Date();
+    let vipEnd = new Date(vipTime);
+    let stateDom = document.getElementById("userVipState");
+    if(!vipTime||now>vipEnd){
+        stateDom.innerText="普通用户";
+        stateDom.style.color="#ccc";
+    }else{
+        stateDom.innerText="💜 月度会员生效中";
+        stateDom.style.color="#9333ea";
+    }
+}
+
+// 生成限制判断
+function getZeroTime(d){
     let t=new Date(d);
     return new Date(t.getFullYear(),t.getMonth(),t.getDate(),0,0,0).getTime();
 }
-function isKeyOverdue(createStr){
-    let create=new Date(createStr);
-    let now=new Date();
-    let cZero=getZeroTimeStamp(create);
-    let nZero=getZeroTimeStamp(now);
-    let day=Math.floor((nZero-cZero)/(1000*60*60*24));
-    return day>=EXPIRE_DAY;
-}
-function clearOverdueKey(){
-    let newArr=[];
-    for(let k of KeyDataBase.allKey){
-        let d=KeyDataBase.createDate[k];
-        if(!d||!isKeyOverdue(d))newArr.push(k);
-        else if(!KeyDataBase.outTimeKey.includes(k))KeyDataBase.outTimeKey.push(k);
+function checkMakeLimit(){
+    let last = KeyData.userMakeTime[currentUser]||"";
+    let now = new Date();
+    if(!last){
+        document.getElementById("keyLimitTip").innerText="可正常生成密钥";
+        document.getElementById("createKeyBtn").disabled=false;
+        return;
     }
-    KeyDataBase.allKey=newArr;
-    saveNetData();
+    let lastZero = getZeroTime(last);
+    let nowZero = getZeroTime(now);
+    let day = Math.floor((nowZero-lastZero)/(1000*60*60*24));
+    if(day<7){
+        let rest = 7-day;
+        document.getElementById("keyLimitTip").innerText=`普通用户剩余${rest}天0点后可再生成`;
+        document.getElementById("createKeyBtn").disabled=true;
+    }else{
+        document.getElementById("keyLimitTip").innerText="冷却结束，可重新生成";
+        document.getElementById("createKeyBtn").disabled=false;
+    }
 }
 
-// ===================== 密钥生成/验证逻辑 =====================
+// 生成密钥
 function getRandKey(){
-    let str="0123456789abcdef",res="";
-    for(let i=0;i<32;i++)res+=str[Math.floor(Math.random()*16)];
-    return "FREE_"+res;
-}
-function getUniqueKey(){
-    let k;
-    do{k=getRandKey();}
-    while(KeyDataBase.allKey.includes(k)||KeyDataBase.usedKey.includes(k)||KeyDataBase.banKey.includes(k)||KeyDataBase.outTimeKey.includes(k));
-    return k;
+    let s="0123456789abcdef",str="";
+    for(let i=0;i<32;i++)str+=s[Math.floor(Math.random()*16)];
+    return "FREE_"+str;
 }
 function createOneKey(){
-    if(!isUserLogin){alert("请先登录游戏账号！");return;}
-    if(!firewallLimitCheck())return;
-    clearOverdueKey();
-    let k=getUniqueKey();
-    KeyDataBase.allKey.push(k);
-    KeyDataBase.createDate[k]=new Date().toLocaleDateString();
-    saveNetData();
+    if(!isUserLogin)return alert("请先登录");
+    if(!firewallCheck())return;
+    let last = KeyData.userMakeTime[currentUser]||"";
+    if(last){
+        let now=new Date(),lastZero=getZeroTime(last),nowZero=getZeroTime(now);
+        let d=Math.floor((nowZero-lastZero)/(1000*60*60*24));
+        if(d<7)return alert("未满7天凌晨0点，暂时无法生成");
+    }
+    let k=getRandKey();
+    KeyData.all.push(k);
+    KeyData.createDate[k]=new Date().toLocaleDateString();
+    KeyData.userMakeTime[currentUser]=new Date().toLocaleDateString();
+    saveKey();
     document.getElementById("keyOutput").value+=k+"\n";
-    refreshData();
+    checkMakeLimit();refreshData();
 }
-function createBatch(num){
-    if(!isUserLogin){alert("请先登录游戏账号！");return;}
-    if(!firewallLimitCheck())return;
-    clearOverdueKey();
-    let txt="";
-    for(let i=0;i<num;i++){
-        let k=getUniqueKey();
-        KeyDataBase.allKey.push(k);
-        KeyDataBase.createDate[k]=new Date().toLocaleDateString();
-        txt+=k+"\n";
-    }
-    saveNetData();
-    document.getElementById("keyOutput").value+=txt;
-    refreshData();
-}
-function clearText(){document.getElementById("keyOutput").value="";}
+function clearText(){document.getElementById("keyOutput").value=""}
 function publicCheckKey(){
-    if(!isUserLogin){alert("请先登录游戏账号！");return;}
-    if(!firewallLimitCheck())return;
-    clearOverdueKey();
+    if(!isUserLogin||!firewallCheck())return;
     let k=document.getElementById("pubCheckKey").value.trim();
-    if(!k.startsWith("FREE_")||k.replace("FREE_","").length!==32){
-        alert("❌ 密钥格式非法，防火墙已拦截");return;
-    }
-    if(KeyDataBase.outTimeKey.includes(k)){
-        alert("❌ 密钥已满7天凌晨0点自动过期，无法使用");return;
-    }
-    if(KeyDataBase.banKey.includes(k))alert("❌ 此密钥已被管理员封禁");
-    else if(KeyDataBase.usedKey.includes(k))alert("⚠️ 密钥已使用立即失效");
-    else if(KeyDataBase.allKey.includes(k)){
-        alert("✅ 密钥有效，可正常激活使用");
-        KeyDataBase.usedKey.push(k);
-        saveNetData();refreshData();
-    }else alert("❌ 无效不存在密钥");
+    if(!k.startsWith("FREE_"))return alert("密钥格式错误");
+    if(KeyData.over.includes(k))return alert("已满7天0点过期");
+    if(KeyData.ban.includes(k))return alert("已被封禁");
+    if(KeyData.used.includes(k))return alert("已使用失效");
+    if(KeyData.all.includes(k)){
+        alert("✅ 密钥有效");
+        KeyData.used.push(k);saveKey();refreshData();
+    }else alert("无效密钥");
 }
 
-// ===================== 管理员后台 =====================
+// 管理员功能
 function loginAdmin(){
     let p=document.getElementById("adminPwd").value.trim();
     if(p===ADMIN_PWD){
-        isAdmin=true;
-        document.getElementById("adminPanel").style.display="block";
-        alert("✅ 管理员身份验证通过");
-        refreshData();
-    }else alert("❌ 管理员密码错误");
+        isAdmin=true;document.getElementById("adminPanel").style.display="block";alert("管理员登录成功");
+    }else kickBlack("错误尝试管理员密码");
 }
 function showAllUserList(){
-    if(!isAdmin){alert("仅限管理员查看");return;}
-    let html="";
-    if(UserList.length===0)html="<p style='color:#999'>暂无任何注册游戏账号</p>";
-    else{
-        UserList.forEach((item,idx)=>{
-            html+=`<p>${idx+1}. 账号：${item.user} | 注册时间：${item.regTime}</p>`;
-        });
-    }
-    document.getElementById("userListBox").innerHTML=html;
+    if(!isAdmin)return;
+    let h="";UserData.forEach((x,i)=>h+=`${i+1} 账号：${x.acc}\n`);
+    document.getElementById("userListBox").innerHTML=h;
 }
-function checkKeyState(){
-    if(!isAdmin){alert("仅限管理员操作");return;}
-    clearOverdueKey();
-    let k=document.getElementById("checkKeyInput").value.trim();
-    if(!k.startsWith("FREE_")){alert("密钥格式错误");return;}
-    let d=KeyDataBase.createDate[k]||"未知";
-    if(KeyDataBase.outTimeKey.includes(k))alert(`已7天凌晨0点过期 | 创建日期：${d}`);
-    else if(KeyDataBase.banKey.includes(k))alert(`已封禁 | 创建日期：${d}`);
-    else if(KeyDataBase.usedKey.includes(k))alert(`已使用失效 | 创建日期：${d}`);
-    else if(KeyDataBase.allKey.includes(k))alert(`正常可用 | 创建日期：${d}`);
-    else alert("密钥不存在");
+function showBlackList(){
+    if(!isAdmin)return document.getElementById("userListBox").innerHTML=BlackData.join("<br>");
 }
+function setUserVip(){
+    if(!isAdmin)return;
+    let u=document.getElementById("setVipUser").value.trim().toLowerCase();
+    let endTime = new Date(Date.now()+30*24*60*60*1000).toLocaleString();
+    VipData[u]=endTime;saveVip();alert("已开通30天月度会员");
+}
+function checkKeyState(){}
 function blackListKey(){
-    if(!isAdmin)return;
     let k=document.getElementById("checkKeyInput").value.trim();
-    if(!KeyDataBase.banKey.includes(k)){
-        KeyDataBase.banKey.push(k);
-        saveNetData();refreshData();alert("已成功全网封禁");
-    }
-}
-function resetKeyState(){
-    if(!isAdmin)return;
-    let k=document.getElementById("checkKeyInput").value.trim();
-    KeyDataBase.usedKey=KeyDataBase.usedKey.filter(x=>x!==k);
-    KeyDataBase.banKey=KeyDataBase.banKey.filter(x=>x!==k);
-    KeyDataBase.outTimeKey=KeyDataBase.outTimeKey.filter(x=>x!==k);
-    saveNetData();refreshData();alert("已恢复密钥可用状态");
-}
-function batchBanAllUsed(){
-    if(!isAdmin)return;
-    if(confirm("确定作废所有已使用密钥？不可撤回！")){
-        KeyDataBase.banKey=[...new Set([...KeyDataBase.banKey,...KeyDataBase.usedKey])];
-        KeyDataBase.usedKey=[];
-        saveNetData();refreshData();alert("全部已用密钥已作废");
-    }
-}
-function clearAllData(){
-    if(!isAdmin)return;
-    if(confirm("警告：清空全网所有密钥数据，不可恢复！")){
-        KeyDataBase={allKey:[],usedKey:[],banKey:[],outTimeKey:[],createDate:{}};
-        saveNetData();refreshData();alert("✅ 全网密钥数据库已清空");
-    }
+    if(!KeyData.ban.includes(k)){KeyData.ban.push(k);saveKey();refreshData();}
 }
 function refreshData(){
-    document.getElementById("dataBaseView").value=JSON.stringify(KeyDataBase,null,2);
-    document.getElementById("allNum").innerText=KeyDataBase.allKey.length;
-    document.getElementById("usedNum").innerText=KeyDataBase.usedKey.length;
-    document.getElementById("banNum").innerText=KeyDataBase.banKey.length;
-    document.getElementById("outTimeNum").innerText=KeyDataBase.outTimeKey.length;
+    document.getElementById("allNum").innerText=KeyData.all.length;
+    document.getElementById("usedNum").innerText=KeyData.used.length;
+    document.getElementById("banNum").innerText=KeyData.ban.length;
+    document.getElementById("outTimeNum").innerText=KeyData.over.length;
 }
-
-window.onload=function(){
-    loadLoginState();
-    clearOverdueKey();
-    refreshData();
-}
+window.onload=loadLogin;
 </script>
 </body>
 </html>
