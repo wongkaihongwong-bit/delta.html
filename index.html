@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta密钥授权系统 超级管理终极版</title>
+<title>Delta游戏专属密钥授权系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
 body{background:#080808;color:#00ee77;padding:15px}
@@ -170,23 +170,29 @@ function saveAll(){
     safeSet("VipData",JSON.stringify(VipData));
 }
 
-// 超级管理员登录 无视封禁、无视次数、永不封号
+// 超级管理员登录（修复版：直接进入页面）
 function masterLogin(){
     let p = document.getElementById("masterPwd").value.trim();
     if(p === MASTER_PWD){
+        // 强制设置状态
         isAdmin = true;
         isUserLogin = true;
         currentUser = "Delta-Key-Help 超级管理员";
+
+        // 直接修改DOM，显示后台
         document.getElementById("authArea").style.display = "none";
         document.getElementById("userInfo").style.display = "block";
         document.getElementById("currentUser").innerText = currentUser;
         document.getElementById("mainContent").classList.remove("hide-content");
         document.getElementById("adminPanel").style.display = "block";
         document.getElementById("vipBox").style.display = "block";
-        alert("✅ 超级管理员登录成功，全部权限解锁");
+
+        // 刷新数据
         refreshData();
+
+        alert("✅ 超级管理员登录成功！\n设备已解封，不受任何限制");
     }else{
-        alert("密码错误，可无限次重试，不会被封禁");
+        alert("❌ 超级管理员密码错误");
     }
 }
 
@@ -225,7 +231,7 @@ function getAllBlackList(){
 function unbanThisDevice(){
     BlackData = BlackData.filter(id => id !== DEV_ID);
     saveAll();
-    alert("✅ 当前设备已成功移出黑名单");
+    alert("✅ 当前设备已从黑名单移除");
     getAllBlackList();
 }
 
@@ -252,9 +258,9 @@ function showLoginForm(){
 function userRegister(){
     let u = document.getElementById("regUser").value.trim().toLowerCase();
     let p = document.getElementById("regPass").value.trim();
-    if(!u.endsWith("@gmail.com"))return alert("账号必须后缀@gmail.com");
-    if(p.length<6)return alert("密码最少6位");
-    if(UserData.find(x=>x.acc===u))return alert("账号已被注册");
+    if(!u.endsWith("@gmail.com"))return alert("必须@gmail.com");
+    if(p.length<6)return alert("密码至少6位");
+    if(UserData.find(x=>x.acc===u))return alert("已注册");
     UserData.push({acc:u,pwd:p,dev:DEV_ID,time:new Date().toLocaleString()});
     saveAll();alert("注册成功");showLoginForm();
 }
@@ -262,7 +268,7 @@ function userLogin(){
     let u = document.getElementById("loginUser").value.trim().toLowerCase();
     let p = document.getElementById("loginPass").value.trim();
     let find = UserData.find(x=>x.acc===u&&x.pwd===p&&x.dev===DEV_ID);
-    if(!find)return alert("账号密码或设备不匹配");
+    if(!find)return alert("账号/密码/设备不匹配");
     safeSet("LoginUser",u);
     isUserLogin=true;currentUser=u;
     document.getElementById("authArea").style.display="none";
@@ -291,7 +297,7 @@ function checkVipStatus(){
     if(!vipTime||now>vipEnd){
         stateDom.innerText="普通用户";stateDom.style.color="#ccc";
     }else{
-        stateDom.innerText="💜 月度会员生效";stateDom.style.color="#9333ea";
+        stateDom.innerText="💜 月度会员";stateDom.style.color="#9333ea";
     }
 }
 
@@ -311,10 +317,10 @@ function checkMakeLimit(){
     let nowZero = getZeroTime(now);
     let day = Math.floor((nowZero-lastZero)/(1000*60*60*24));
     if(day<7){
-        document.getElementById("keyLimitTip").innerText=`剩余${7-day}天可再次生成`;
+        document.getElementById("keyLimitTip").innerText=`普通用户剩余${7-day}天0点后可再生成`;
         document.getElementById("createKeyBtn").disabled=true;
     }else{
-        document.getElementById("keyLimitTip").innerText="冷却结束可生成";
+        document.getElementById("keyLimitTip").innerText="冷却结束，可重新生成";
         document.getElementById("createKeyBtn").disabled=false;
     }
 }
@@ -330,7 +336,7 @@ function createOneKey(){
     if(last){
         let now=new Date(),lastZero=getZeroTime(last),nowZero=getZeroTime(now);
         let d=Math.floor((nowZero-lastZero)/(1000*60*60*24));
-        if(d<7)return alert("未满7天无法生成");
+        if(d<7)return alert("未满7天凌晨0点，暂时无法生成");
     }
     let k=getRandKey();
     KeyData.all.push(k);
@@ -345,8 +351,8 @@ function publicCheckKey(){
     if(!isUserLogin)return;
     let k=document.getElementById("pubCheckKey").value.trim();
     if(!k.startsWith("FREE_"))return alert("密钥格式错误");
-    if(KeyData.ban.includes(k))return alert("密钥已封禁");
-    if(KeyData.used.includes(k))return alert("密钥已使用");
+    if(KeyData.ban.includes(k))return alert("已被封禁");
+    if(KeyData.used.includes(k))return alert("已使用失效");
     if(KeyData.all.includes(k)){
         alert("✅ 密钥有效");
         KeyData.used.push(k);saveAll();refreshData();
@@ -362,7 +368,7 @@ function setUserVip(){
     if(!isAdmin)return;
     let u=document.getElementById("setVipUser").value.trim().toLowerCase();
     let endTime = new Date(Date.now()+30*24*60*60*1000).toLocaleString();
-    VipData[u]=endTime;saveAll();alert("成功开通30天会员");
+    VipData[u]=endTime;saveAll();alert("已开通30天会员");
 }
 function checkKeyState(){}
 function blackListKey(){
