@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta密钥授权系统 会员付费完整版</title>
+<title>Delta游戏专属密钥授权系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
 body{background:#080808;color:#00ee77;padding:15px}
@@ -128,6 +128,7 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
 </div>
 
 <script>
+const ADMIN_USER = "Delta-Key-Help";
 const ADMIN_PWD = "0189597579";
 const EXPIRE_DAY = 7;
 const WHATSAPP_NUM = "60189597579";
@@ -153,7 +154,6 @@ let KeyData = JSON.parse(safeGet("KeyData"))||{
 let UserData = JSON.parse(safeGet("UserData"))||[];
 let BlackData = JSON.parse(safeGet("BlackData"))||[];
 let VipData = JSON.parse(safeGet("VipData"))||{};
-// 管理员错误计数
 let AdminErrCount = parseInt(safeGet("AdminErr"+DEV_ID)) || 0;
 
 function saveKey(){safeSet("KeyData",JSON.stringify(KeyData))}
@@ -185,7 +185,7 @@ function checkAcc(acc){
     return {ok:true};
 }
 
-// 跳转联系（已修复国家码）
+// 跳转联系
 function openWhatsAppHelp(){
     let txt = encodeURIComponent("我遇到了问题：（请写上问题）");
     window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
@@ -333,23 +333,37 @@ function publicCheckKey(){
     }else alert("无效密钥");
 }
 
-// 管理员登录：输错3次直接永久拉黑
+// 管理员登录：新增超级账号
 function loginAdmin(){
-    if(isBlack())return;
-    let p=document.getElementById("adminPwd").value.trim();
-    if(p===ADMIN_PWD){
-        isAdmin=true;
-        AdminErrCount=0;
-        saveAdminErr();
-        document.getElementById("adminPanel").style.display="block";
-        alert("管理员登录成功");
-    }else{
-        AdminErrCount++;
-        saveAdminErr();
-        if(AdminErrCount >= 3){
-            kickBlack("连续3次错误输入管理员密码，判定入侵");
+    let userInput = prompt("请输入管理员账号：");
+    if(userInput === ADMIN_USER){
+        let p=document.getElementById("adminPwd").value.trim();
+        if(p===ADMIN_PWD){
+            isAdmin=true;
+            AdminErrCount=0;
+            saveAdminErr();
+            document.getElementById("adminPanel").style.display="block";
+            alert("✅ 超级管理员登录成功，不受任何防暴力限制！");
         }else{
-            alert(`管理员密码错误！还剩${3-AdminErrCount}次机会`);
+            alert("❌ 密码错误！请核对密码后重试");
+        }
+    }else{
+        if(isBlack())return;
+        let p=document.getElementById("adminPwd").value.trim();
+        if(p===ADMIN_PWD){
+            isAdmin=true;
+            AdminErrCount=0;
+            saveAdminErr();
+            document.getElementById("adminPanel").style.display="block";
+            alert("✅ 管理员登录成功");
+        }else{
+            AdminErrCount++;
+            saveAdminErr();
+            if(AdminErrCount >= 3){
+                kickBlack("连续3次错误输入管理员密码，判定入侵");
+            }else{
+                alert(`管理员密码错误！还剩${3-AdminErrCount}次机会`);
+            }
         }
     }
 }
