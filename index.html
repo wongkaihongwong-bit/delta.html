@@ -130,7 +130,7 @@ textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color
 <script>
 const ADMIN_PWD = "0189597579";
 const EXPIRE_DAY = 7;
-const WHATSAPP_NUM = "0189597579";
+const WHATSAPP_NUM = "60189597579";
 const SAFE_KEY = "Delta_Vip_System_2026";
 let isAdmin = false,isUserLogin = false,currentUser = "";
 let clickCount = 0,lastClickTime = 0;
@@ -153,11 +153,14 @@ let KeyData = JSON.parse(safeGet("KeyData"))||{
 let UserData = JSON.parse(safeGet("UserData"))||[];
 let BlackData = JSON.parse(safeGet("BlackData"))||[];
 let VipData = JSON.parse(safeGet("VipData"))||{};
+// 管理员错误计数
+let AdminErrCount = parseInt(safeGet("AdminErr"+DEV_ID)) || 0;
 
 function saveKey(){safeSet("KeyData",JSON.stringify(KeyData))}
 function saveUser(){safeSet("UserData",JSON.stringify(UserData))}
 function saveBlack(){safeSet("BlackData",JSON.stringify(BlackData))}
 function saveVip(){safeSet("VipData",JSON.stringify(VipData))}
+function saveAdminErr(){safeSet("AdminErr"+DEV_ID,AdminErrCount)}
 
 // 黑客拦截
 function isBlack(){return BlackData.includes(DEV_ID)}
@@ -182,7 +185,7 @@ function checkAcc(acc){
     return {ok:true};
 }
 
-// 跳转联系
+// 跳转联系（已修复国家码）
 function openWhatsAppHelp(){
     let txt = encodeURIComponent("我遇到了问题：（请写上问题）");
     window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
@@ -330,12 +333,25 @@ function publicCheckKey(){
     }else alert("无效密钥");
 }
 
-// 管理员功能
+// 管理员登录：输错3次直接永久拉黑
 function loginAdmin(){
+    if(isBlack())return;
     let p=document.getElementById("adminPwd").value.trim();
     if(p===ADMIN_PWD){
-        isAdmin=true;document.getElementById("adminPanel").style.display="block";alert("管理员登录成功");
-    }else kickBlack("错误尝试管理员密码");
+        isAdmin=true;
+        AdminErrCount=0;
+        saveAdminErr();
+        document.getElementById("adminPanel").style.display="block";
+        alert("管理员登录成功");
+    }else{
+        AdminErrCount++;
+        saveAdminErr();
+        if(AdminErrCount >= 3){
+            kickBlack("连续3次错误输入管理员密码，判定入侵");
+        }else{
+            alert(`管理员密码错误！还剩${3-AdminErrCount}次机会`);
+        }
+    }
 }
 function showAllUserList(){
     if(!isAdmin)return;
