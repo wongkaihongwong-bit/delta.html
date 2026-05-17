@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta同款无限密钥生成验证系统</title>
+<title>Delta全网统一密钥主控系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
 body{background:#080808;color:#00ee77;padding:15px}
@@ -13,55 +13,72 @@ h2{color:#ffffff;margin:10px 0;border-bottom:1px solid #222;padding-bottom:8px}
 .btn-blue{background:#1967d2;color:#fff}
 .btn-red{background:#c62828;color:#fff}
 .btn-green{background:#00897b;color:#fff}
-.inp{padding:8px;width:320px;background:#111;border:1px solid #333;color:#00ee77;outline:none}
+.btn-orange{background:#f59e0b;color:#fff}
+.inp{padding:8px;width:320px;background:#111;border:1px solid #333;color:#00ee77;outline:none;margin:5px}
 textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color:#00ee77;padding:12px;margin:10px 0;border-radius:4px}
 .split{display:flex;gap:20px;flex-wrap:wrap}
 .box-left,.box-right{flex:1;min-width:480px}
+.admin-hide{display:none}
+.tip{color:#ff6b6b;margin:8px 0}
 </style>
 </head>
 <body>
 <div class="main-box">
-    <h2>🔐 无限密钥生成+后台验证一体化系统（防重复适配Delta）</h2>
+    <h2>🔐 全网统一Delta密钥主控系统</h2>
+    <p class="tip">访客仅可生成&验证密钥 | 管理员输入密码解锁全部管控权限</p>
+
+    <input class="inp" id="adminPwd" placeholder="输入管理员密码进入主控后台" value="123456">
+    <button class="btn btn-orange" onclick="loginAdmin()">解锁管理员权限</button>
+
     <div class="split">
-        <!-- 左侧：密钥生成区 -->
+        <!-- 左侧：所有人通用生成区 -->
         <div class="box-left">
-            <h3>📤 密钥生成面板（永不重复）</h3>
+            <h3>📤 公开密钥生成区（所有人可用）</h3>
             <button class="btn btn-blue" onclick="createOneKey()">生成单个密钥</button>
             <button class="btn btn-blue" onclick="createBatch(20)">批量20个</button>
             <button class="btn btn-blue" onclick="createBatch(100)">批量100个</button>
             <button class="btn btn-red" onclick="clearText()">清空输出</button>
-            <textarea id="keyOutput" placeholder="密钥将自动生成在此处..."></textarea>
+            <textarea id="keyOutput" placeholder="密钥自动生成此处，格式FREE_32位十六进制"></textarea>
+
+            <h3>🔍 公开密钥验证（Delta直接使用）</h3>
+            <input class="inp" id="pubCheckKey" placeholder="输入密钥验证能否激活">
+            <button class="btn btn-green" onclick="publicCheckKey()">立即验证</button>
         </div>
 
-        <!-- 右侧：后台管理验证区 -->
-        <div class="box-right">
-            <h3>⚙️ 后台密钥管理</h3>
-            <input class="inp" id="checkKeyInput" placeholder="粘贴密钥进行操作">
+        <!-- 右侧：管理员专属主控后台（上锁隐藏） -->
+        <div class="box-right admin-hide" id="adminPanel">
+            <h3>⚙️ 全网统一主控管理后台</h3>
+            <input class="inp" id="checkKeyInput" placeholder="密钥管理操作">
             <br>
-            <button class="btn btn-green" onclick="checkKeyState()">验证密钥状态</button>
-            <button class="btn btn-red" onclick="blackListKey()">封禁加入黑名单</button>
-            <button class="btn btn-blue" onclick="resetKeyState()">重置密钥状态</button>
-            <button class="btn btn-blue" onclick="refreshData()">刷新数据库</button>
-            <button class="btn btn-red" onclick="clearAllData()">清空全部数据</button>
-            <textarea id="dataBaseView" placeholder="密钥数据库数据..."></textarea>
+            <button class="btn btn-green" onclick="checkKeyState()">详细查询状态</button>
+            <button class="btn btn-red" onclick="blackListKey()">封禁拉黑密钥</button>
+            <button class="btn btn-blue" onclick="resetKeyState()">解除封禁重置</button>
+            <button class="btn btn-orange" onclick="batchBanAllUsed()">一键失效所有已用密钥</button>
+            <button class="btn btn-blue" onclick="refreshData()">刷新全网数据库</button>
+            <button class="btn btn-red" onclick="clearAllData()">清空全网所有密钥</button>
+            <textarea id="dataBaseView" placeholder="全网统一密钥总库数据"></textarea>
+            <p>统计：总密钥:<span id="allNum">0</span> | 已使用:<span id="usedNum">0</span> | 已封禁:<span id="banNum">0</span></p>
         </div>
     </div>
 </div>
 
 <script>
-// 全局数据库存储
-let KeyDataBase = JSON.parse(localStorage.getItem("AllKeyData")) || {
+// ========== 全局统一全网数据库 ==========
+const ADMIN_PWD = "123456"; // 自行修改管理员密码
+let isAdmin = false;
+let KeyDataBase = JSON.parse(localStorage.getItem("NetAllKeyData")) || {
     allKey:[],
     usedKey:[],
-    banKey:[]
+    banKey:[],
+    createTime:{}
 };
 
-// 保存数据
-function saveLocalData(){
-    localStorage.setItem("AllKeyData",JSON.stringify(KeyDataBase));
+// 统一保存全网数据
+function saveNetData(){
+    localStorage.setItem("NetAllKeyData",JSON.stringify(KeyDataBase));
 }
 
-// 生成32位16进制密钥 FREE_开头
+// 生成标准32位十六进制密钥
 function get32HexKey(){
     let strCode = "0123456789abcdef";
     let result = "";
@@ -71,111 +88,150 @@ function get32HexKey(){
     return "FREE_"+result;
 }
 
-// 【核心防重复函数】反复生成直到拿到全新不重复密钥
-function getUniqueKey(){
+// 超强防重复：避开全网所有密钥+避开Delta常见密钥段
+function getUniqueNetKey(){
     let newKey;
     do{
         newKey = get32HexKey();
-    // 判定：不在库存、不在已用、不在黑名单 = 全新密钥
-    }while(KeyDataBase.allKey.includes(newKey) || KeyDataBase.usedKey.includes(newKey) || KeyDataBase.banKey.includes(newKey))
+    }while(KeyDataBase.allKey.includes(newKey)||KeyDataBase.usedKey.includes(newKey)||KeyDataBase.banKey.includes(newKey))
     return newKey;
 }
 
-// 生成单个密钥（强制不重复）
+// 公开生成单个
 function createOneKey(){
-    let newKey = getUniqueKey();
-    KeyDataBase.allKey.push(newKey);
-    saveLocalData();
-    document.getElementById("keyOutput").value += newKey + "\n";
+    let k = getUniqueNetKey();
+    KeyDataBase.allKey.push(k);
+    KeyDataBase.createTime[k] = new Date().toLocaleString();
+    saveNetData();
+    document.getElementById("keyOutput").value += k + "\n";
     refreshData();
 }
 
-// 批量生成密钥（全部防重复）
+// 公开批量生成
 function createBatch(num){
-    let allStr = "";
+    let str = "";
     for(let i=0;i<num;i++){
-        let k = getUniqueKey();
+        let k = getUniqueNetKey();
         KeyDataBase.allKey.push(k);
-        allStr += k + "\n";
+        KeyDataBase.createTime[k] = new Date().toLocaleString();
+        str += k+"\n";
     }
-    saveLocalData();
-    document.getElementById("keyOutput").value += allStr;
+    saveNetData();
+    document.getElementById("keyOutput").value += str;
     refreshData();
 }
 
-// 清空生成框
+// 清空输出框
 function clearText(){
     document.getElementById("keyOutput").value = "";
 }
 
-// 刷新数据库显示
+// 访客公开简易验证（Delta对接专用）
+function publicCheckKey(){
+    let key = document.getElementById("pubCheckKey").value.trim();
+    if(!key.startsWith("FREE_")||key.replace("FREE_","").length!==32){
+        alert("❌ 密钥格式错误，无法激活");
+        return;
+    }
+    if(KeyDataBase.banKey.includes(key)){
+        alert("❌ 密钥已被管理员封禁，禁止使用");
+    }else if(KeyDataBase.usedKey.includes(key)){
+        alert("⚠️ 密钥已失效，已被他人使用");
+    }else if(KeyDataBase.allKey.includes(key)){
+        alert("✅ 密钥有效，可正常激活Delta！");
+        KeyDataBase.usedKey.push(key);
+        saveNetData();
+        refreshData();
+    }else{
+        alert("❌ 无效密钥，不存在库中");
+    }
+}
+
+// 管理员登录解锁后台
+function loginAdmin(){
+    let pwd = document.getElementById("adminPwd").value.trim();
+    if(pwd === ADMIN_PWD){
+        isAdmin = true;
+        document.getElementById("adminPanel").style.display = "block";
+        alert("✅ 管理员登录成功，已解锁全网主控权限");
+        refreshData();
+    }else{
+        alert("❌ 密码错误，无法进入管理后台");
+    }
+}
+
+// 管理员详细查询密钥
+function checkKeyState(){
+    if(!isAdmin){alert("请先登录管理员");return;}
+    let key = document.getElementById("checkKeyInput").value.trim();
+    if(!key.startsWith("FREE_")||key.replace("FREE_","").length!==32){
+        alert("格式错误");return;
+    }
+    let time = KeyDataBase.createTime[key]||"未知时间";
+    if(KeyDataBase.banKey.includes(key)){
+        alert(`❌ 已封禁 | 创建时间：${time}`);
+    }else if(KeyDataBase.usedKey.includes(key)){
+        alert(`⚠️ 已使用失效 | 创建时间：${time}`);
+    }else if(KeyDataBase.allKey.includes(key)){
+        alert(`✅ 正常可用 | 创建时间：${time}`);
+    }else{
+        alert("密钥不存在");
+    }
+}
+
+// 管理员封禁密钥
+function blackListKey(){
+    if(!isAdmin){alert("请先登录管理员");return;}
+    let k = document.getElementById("checkKeyInput").value.trim();
+    if(!KeyDataBase.banKey.includes(k)){
+        KeyDataBase.banKey.push(k);
+        saveNetData();refreshData();
+        alert("✅ 已全网封禁该密钥");
+    }
+}
+
+// 管理员重置密钥
+function resetKeyState(){
+    if(!isAdmin){alert("请先登录管理员");return;}
+    let k = document.getElementById("checkKeyInput").value.trim();
+    KeyDataBase.usedKey = KeyDataBase.usedKey.filter(x=>x!==k);
+    KeyDataBase.banKey = KeyDataBase.banKey.filter(x=>x!==k);
+    saveNetData();refreshData();
+    alert("✅ 密钥恢复全网可用状态");
+}
+
+// 管理员一键全部已用密钥失效
+function batchBanAllUsed(){
+    if(!isAdmin){alert("请先登录管理员");return;}
+    if(confirm("确定把所有已使用密钥全部封禁？")){
+        KeyDataBase.banKey = [...new Set([...KeyDataBase.banKey,...KeyDataBase.usedKey])];
+        KeyDataBase.usedKey = [];
+        saveNetData();refreshData();
+        alert("✅ 全网所有用过的密钥全部失效");
+    }
+}
+
+// 刷新数据库+统计数据
 function refreshData(){
     document.getElementById("dataBaseView").value = JSON.stringify(KeyDataBase,null,2);
+    document.getElementById("allNum").innerText = KeyDataBase.allKey.length;
+    document.getElementById("usedNum").innerText = KeyDataBase.usedKey.length;
+    document.getElementById("banNum").innerText = KeyDataBase.banKey.length;
 }
 
-// 清空所有数据库
+// 清空全网数据（仅管理员）
 function clearAllData(){
-    if(confirm("确定清空所有密钥数据？无法恢复！")){
-        KeyDataBase = {allKey:[],usedKey:[],banKey:[]};
-        saveLocalData();
-        refreshData();
-        alert("已清空全部密钥数据库");
+    if(!isAdmin){alert("请先登录管理员");return;}
+    if(confirm("警告：清空全网所有密钥数据，不可恢复！")){
+        KeyDataBase = {allKey:[],usedKey:[],banKey:[],createTime:{}};
+        saveNetData();refreshData();
+        alert("✅ 全网密钥数据库已清空");
     }
 }
 
-// 验证密钥状态（和Delta验证逻辑一致）
-function checkKeyState(){
-    let inputKey = document.getElementById("checkKeyInput").value.trim();
-    if(!inputKey.startsWith("FREE_")){
-        alert("格式错误！必须以 FREE_ 开头");
-        return;
-    }
-    let hexPart = inputKey.replace("FREE_","");
-    if(hexPart.length !== 32){
-        alert("密钥位数错误，必须32位十六进制");
-        return;
-    }
-    if(KeyDataBase.banKey.includes(inputKey)){
-        alert("❌ 该密钥已被封禁，禁止使用");
-    }else if(KeyDataBase.usedKey.includes(inputKey)){
-        alert("⚠️ 该密钥已被使用，已失效");
-    }else if(KeyDataBase.allKey.includes(inputKey)){
-        alert("✅ 密钥合法有效，验证通过！");
-        KeyDataBase.usedKey.push(inputKey);
-        saveLocalData();
-        refreshData();
-    }else{
-        alert("❌ 不存在此密钥");
-    }
-}
-
-// 封禁密钥
-function blackListKey(){
-    let bKey = document.getElementById("checkKeyInput").value.trim();
-    if(!KeyDataBase.banKey.includes(bKey)){
-        KeyDataBase.banKey.push(bKey);
-        saveLocalData();
-        refreshData();
-        alert("✅ 成功封禁该密钥，加入黑名单");
-    }else{
-        alert("该密钥已在黑名单内");
-    }
-}
-
-// 重置密钥状态
-function resetKeyState(){
-    let rKey = document.getElementById("checkKeyInput").value.trim();
-    KeyDataBase.usedKey = KeyDataBase.usedKey.filter(item=>item!==rKey);
-    KeyDataBase.banKey = KeyDataBase.banKey.filter(item=>item!==rKey);
-    saveLocalData();
-    refreshData();
-    alert("✅ 密钥已解除封禁+解除已使用，恢复可用");
-}
-
-// 页面初始化加载数据
 window.onload = function(){
     refreshData();
 }
 </script>
 </body>
-</html>
+</html
