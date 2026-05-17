@@ -21,11 +21,11 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
 </head>
 <body>
 <div class="main-box">
-    <h2>🔐 无限密钥生成+后台验证一体化系统</h2>
+    <h2>🔐 无限密钥生成+后台验证一体化系统（防重复适配Delta）</h2>
     <div class="split">
         <!-- 左侧：密钥生成区 -->
         <div class="box-left">
-            <h3>📤 密钥生成面板</h3>
+            <h3>📤 密钥生成面板（永不重复）</h3>
             <button class="btn btn-blue" onclick="createOneKey()">生成单个密钥</button>
             <button class="btn btn-blue" onclick="createBatch(20)">批量20个</button>
             <button class="btn btn-blue" onclick="createBatch(100)">批量100个</button>
@@ -39,7 +39,7 @@ textarea{width:100%;min-height:280px;background:#000;border:1px solid #333;color
             <input class="inp" id="checkKeyInput" placeholder="粘贴密钥进行操作">
             <br>
             <button class="btn btn-green" onclick="checkKeyState()">验证密钥状态</button>
-            <button class="btn btn-red" onclick="blackListKey">封禁加入黑名单</button>
+            <button class="btn btn-red" onclick="blackListKey()">封禁加入黑名单</button>
             <button class="btn btn-blue" onclick="resetKeyState()">重置密钥状态</button>
             <button class="btn btn-blue" onclick="refreshData()">刷新数据库</button>
             <button class="btn btn-red" onclick="clearAllData()">清空全部数据</button>
@@ -71,20 +71,30 @@ function get32HexKey(){
     return "FREE_"+result;
 }
 
-// 生成单个密钥
+// 【核心防重复函数】反复生成直到拿到全新不重复密钥
+function getUniqueKey(){
+    let newKey;
+    do{
+        newKey = get32HexKey();
+    // 判定：不在库存、不在已用、不在黑名单 = 全新密钥
+    }while(KeyDataBase.allKey.includes(newKey) || KeyDataBase.usedKey.includes(newKey) || KeyDataBase.banKey.includes(newKey))
+    return newKey;
+}
+
+// 生成单个密钥（强制不重复）
 function createOneKey(){
-    let newKey = get32HexKey();
+    let newKey = getUniqueKey();
     KeyDataBase.allKey.push(newKey);
     saveLocalData();
     document.getElementById("keyOutput").value += newKey + "\n";
     refreshData();
 }
 
-// 批量生成密钥
+// 批量生成密钥（全部防重复）
 function createBatch(num){
     let allStr = "";
     for(let i=0;i<num;i++){
-        let k = get32HexKey();
+        let k = getUniqueKey();
         KeyDataBase.allKey.push(k);
         allStr += k + "\n";
     }
@@ -113,7 +123,7 @@ function clearAllData(){
     }
 }
 
-// 验证密钥状态
+// 验证密钥状态（和Delta验证逻辑一致）
 function checkKeyState(){
     let inputKey = document.getElementById("checkKeyInput").value.trim();
     if(!inputKey.startsWith("FREE_")){
@@ -169,4 +179,3 @@ window.onload = function(){
 </script>
 </body>
 </html>
-
