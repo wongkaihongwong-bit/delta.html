@@ -1,445 +1,551 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Delta游戏专属密钥授权系统</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多功能密钥会员系统</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,"微软雅黑"}
-body{background:#080808;color:#00ee77;padding:15px}
-.main-box{max-width:1100px;margin:0 auto}
-h2{color:#ffffff;margin:10px 0;border-bottom:1px solid #222;padding-bottom:8px}
-.btn{padding:9px 18px;margin:5px;border:0;border-radius:3px;cursor:pointer;font-size:14px}
-.btn-blue{background:#1967d2;color:#fff}
-.btn-red{background:#c62828;color:#fff}
-.btn-green{background:#00897b;color:#fff}
-.btn-orange{background:#f59e0b;color:#fff}
-.btn-help{background:#25D366;color:#fff}
-.btn-vip{background:#9333ea;color:#fff}
-.inp{padding:8px;width:320px;background:#111;border:1px solid #333;color:#00ee77;outline:none;margin:5px}
-textarea{width:100%;min-height:220px;background:#000;border:1px solid #333;color:#00ee77;padding:12px;margin:10px 0;border-radius:4px}
-.split{display:flex;gap:20px;flex-wrap:wrap}
-.box-left,.box-right{flex:1;min-width:480px}
-.admin-hide{display:none}
-.tip{color:#ff6b6b;margin:8px 0}
-.auth-box{text-align:center;padding:30px;border:1px solid #333;border-radius:8px;margin:20px 0}
-.hide-content{display:none;}
-.user-info{color:#ccc;margin:5px 0;font-size:14px}
-.user-list-box{background:#111;padding:15px;border-radius:6px;margin:10px 0;max-height:200px;overflow:auto}
-.firewall-tip{color:#4cd964;font-size:13px;margin:5px 0}
-.guide-tip{color:#ffcc00;font-size:12px;text-align:left;margin:10px 0;padding:10px;background:#1a1a1a;border-radius:4px}
-.footer-help{text-align:center;margin-top:30px;padding:15px;border-top:1px solid #333;color:#ccc}
-.vip-box{border:1px solid #9333ea;padding:15px;border-radius:8px;margin:15px 0;background:#120a1f}
-.query-box{margin:10px 0;padding:10px;border:1px solid #444;border-radius:5px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+body{padding:20px;background:#f5f5f5;}
+.box{background:#fff;padding:20px;border-radius:8px;margin:10px 0;}
+input,button,select,textarea{padding:8px;margin:5px;border-radius:4px;border:1px solid #ccc;}
+button{cursor:pointer;background:#2196F3;color:white;border:none;}
+h3{margin:10px 0;}
+.flex{display:flex;gap:10px;flex-wrap:wrap;}
+.lang-box{text-align:right;margin-bottom:10px;}
+.envelope-badge{background:red;color:white;border-radius:50%;padding:2px 6px;font-size:12px;}
+.envelope-item{border:1px solid #ddd;padding:10px;margin:5px 0;border-radius:4px;}
+.envelope-unread{background:#e3f2fd;}
 </style>
 </head>
 <body>
-<div class="main-box">
-    <h2>🔐 Delta游戏专属密钥授权系统</h2>
-    <p class="tip">单设备单账号注册 | 普通7天1次 | 会员月付RM10解锁每月2次 | 防黑客入侵</p>
-    <div class="firewall-tip">✅ 防护正常生效，超级管理员不受任何封禁限制</div>
+<div id="app">
+    <!-- 语言切换栏 -->
+    <div class="lang-box">
+        <span data-lang="langText">切换语言</span>：
+        <select id="langSelect" onchange="switchLanguage()">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+        </select>
+    </div>
 
-    <div class="auth-box" id="authArea">
-        <div id="loginForm">
-            <h3 style="color:#fff;margin-bottom:15px">🎮 游戏账号登录</h3>
-            <div class="guide-tip">
-                新手规则：<br>
-                1. 一台设备只能注册1个账号，无法创建小号<br>
-                2. 账号必须小写英文+数字@gmail.com<br>
-                3. 普通用户7天0点仅可生成1个密钥<br>
-                4. 付费会员每月可生成2次密钥
+    <!-- 登录注册首页 -->
+    <div id="loginBox" class="box">
+        <h3 data-lang="loginTitle">账号登录注册</h3>
+        <input type="email" id="regMail" data-placeholder="mailPlaceholder" placeholder="专属@gmail邮箱账号">
+        <input type="password" id="regPwd" data-placeholder="pwdPlaceholder" placeholder="设置登录密码">
+        <input type="text" id="userAvatar" data-placeholder="avatarPlaceholder" placeholder="上传头像链接(空则随机头像)">
+        <input type="date" id="birthDay" data-placeholder="birthPlaceholder" placeholder="选择出生日期">
+        <div class="flex">
+            <button onclick="userRegister()" data-lang="regBtn">注册账号</button>
+            <button onclick="userLogin()" data-lang="loginBtn">立即登录</button>
+        </div>
+    </div>
+
+    <!-- 普通用户中心 -->
+    <div id="userPanel" class="box" style="display:none">
+        <h3 data-lang="userCenter">个人用户中心</h3>
+        <p id="userInfo"></p>
+        <p id="memberInfo"></p>
+        <p id="keyCountInfo"></p>
+        <button onclick="createUserKey()" data-lang="genKeyBtn">生成可用密钥</button>
+        <p id="keyShow"></p>
+        <hr style="margin:15px 0;">
+        <h4 data-lang="socialTitle">社交聊天功能</h4>
+        <input type="text" id="friendAcc" data-placeholder="friendPlaceholder" placeholder="输入好友邮箱账号">
+        <button onclick="sendFriendApply()" data-lang="applyFriend">发送好友申请</button>
+        <div class="flex">
+            <button onclick="openChat()" data-lang="chatBtn">好友聊天</button>
+            <button onclick="callVoice()" data-lang="voiceCall">语音通话</button>
+            <button onclick="callVideo()" data-lang="videoCall">视频通话</button>
+        </div>
+        <input type="text" id="groupName" data-placeholder="groupPlaceholder" placeholder="创建群聊名称">
+        <button onclick="createGroup()" data-lang="createGroupBtn">创建新群聊</button>
+        <hr style="margin:15px 0;">
+        <h4 data-lang="officialGroupTitle">官方全员固定大群(无法退出)</h4>
+        <div id="officialGroupChat"></div>
+
+        <!-- Roblox风格问题提交表单 -->
+        <hr style="margin:15px 0;">
+        <h4>提交问题给管理员</h4>
+        <input type="email" id="ticketUser" placeholder="用户名（填写你的@gmail.com账号）">
+        <input type="email" id="ticketName" placeholder="名字（填写你的@gmail.com账号）">
+        <select id="ticketDevice">
+            <option value="">选择设备类型</option>
+            <option value="Android手机">Android 手机</option>
+            <option value="Android">Android</option>
+            <option value="平板电脑">平板电脑</option>
+            <option value="Amazon设备">Amazon 设备</option>
+            <option value="Xbox">Xbox</option>
+            <option value="PlayStation">PlayStation</option>
+            <option value="MetaQuest">Meta Quest</option>
+        </select>
+        <textarea id="ticketDesc" rows="4" placeholder="请描述你的问题..."></textarea>
+        <button onclick="submitTicket()">提交问题</button>
+
+        <button onclick="logoutSys()" data-lang="logoutBtn">退出登录</button>
+    </div>
+
+    <!-- 管理员登录入口 -->
+    <div id="adminLoginBox" class="box">
+        <h3 data-lang="adminLoginTitle">管理员专属登录</h3>
+        <input type="text" id="adminAcc" data-placeholder="adminAccPlaceholder" placeholder="管理员账号">
+        <input type="password" id="adminPwd" data-placeholder="adminPwdPlaceholder" placeholder="管理员密码">
+        <button onclick="adminLogin()" data-lang="enterAdmin">进入管理面板</button>
+    </div>
+
+    <!-- 管理员后台面板 -->
+    <div id="adminPanel" class="box" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 data-lang="adminBack">超级管理员后台</h3>
+            <div>
+                <span>信封消息：</span>
+                <span id="envelopeBadge" class="envelope-badge">0</span>
             </div>
-            <input class="inp" id="loginUser" placeholder="输入游戏账号 xxx@gmail.com">
-            <br>
-            <input class="inp" id="loginPass" type="password" placeholder="输入登录密码">
-            <br>
-            <button class="btn btn-green" onclick="userLogin()">登录系统</button>
-            <p style="color:#999;margin-top:10px">无账号 <a href="#" onclick="showRegisterForm()">立即注册</a></p>
+        </div>
+        <hr>
+        <h4 data-lang="createAccAdmin">1.手动无限创建账号</h4>
+        <input type="email" id="makeAcc" data-placeholder="newAccPlaceholder" placeholder="新建邮箱账号">
+        <input type="password" id="makePwd" data-placeholder="newPwdPlaceholder" placeholder="新建账号密码">
+        <button onclick="adminCreateAccount()" data-lang="makeAccBtn">创建账号</button>
+
+        <hr style="margin:10px 0;">
+        <h4 data-lang="grantMember">2.授予会员权限</h4>
+        <input type="text" id="grantAcc" data-placeholder="grantAccPlaceholder" placeholder="填写用户邮箱账号">
+        <div class="flex">
+            <button onclick="giveMonthMember()" data-lang="monthMemberBtn">授予月会员(RM10)</button>
+            <button onclick="giveYearMember()" data-lang="yearMemberBtn">授予年会员(RM120)</button>
         </div>
 
-        <div id="registerForm" style="display:none;">
-            <h3 style="color:#fff;margin-bottom:15px">📝 注册专属游戏账号</h3>
-            <div class="guide-tip">
-                注册须知：<br>
-                仅支持小写字母+数字+@gmail.com<br>
-                注册绑定设备，不可重复注册
-            </div>
-            <input class="inp" id="regUser" placeholder="填写合规游戏账号">
-            <br>
-            <input class="inp" id="regPass" type="password" placeholder="设置6位以上密码">
-            <br>
-            <button class="btn btn-blue" onclick="userRegister()">完成注册</button>
-            <p style="color:#999;margin-top:10px">已有账号 <a href="#" onclick="showLoginForm()">返回登录</a></p>
+        <hr style="margin:10px 0;">
+        <h4 data-lang="blackManage">3.黑名单管理</h4>
+        <input type="text" id="blackUser" data-placeholder="blackUserPlaceholder" placeholder="操作用户账号">
+        <div class="flex">
+            <button onclick="addBlackUser()" data-lang="addBlackBtn">加入黑名单</button>
+            <button onclick="removeBlackUser()" data-lang="delBlackBtn">解除黑名单</button>
+            <button onclick="viewBlackList()" data-lang="viewBlackBtn">查看黑名单</button>
         </div>
-    </div>
+        <div id="blackListData"></div>
 
-    <div class="user-info" id="userInfo" style="display:none;">
-        登录账号：<span id="currentUser"></span>
-        <span id="userVipState" style="color:#9333ea;margin-left:15px"></span>
-        <button class="btn btn-red" onclick="userLogout()">退出登录</button>
-    </div>
-
-    <div class="vip-box" id="vipBox" style="display:none;">
-        <h3 style="color:#9333ea">💜 月度会员开通</h3>
-        <p>会员价格：每月 <b>RM10</b></p>
-        <p>付款方式：TNG E-Wallet <b>0189597579</b></p>
-        <p>会员福利：每月可生成2次密钥+优先权限</p>
-        <button class="btn btn-vip" onclick="openVipChat()">联系客服开通</button>
-    </div>
-
-    <!-- 超级管理员专属入口 无视所有封禁 -->
-    <input class="inp" id="masterPwd" type="password" placeholder="超级管理员密码">
-    <button class="btn btn-orange" onclick="masterLogin()">强行进入管理后台</button>
-
-    <div class="split hide-content" id="mainContent">
-        <div class="box-left">
-            <h3>📤 密钥生成中心</h3>
-            <p id="keyLimitTip" style="color:#ff6b6b;margin:5px 0"></p>
-            <button class="btn btn-blue" id="createKeyBtn" onclick="createOneKey()">生成密钥</button>
-            <button class="btn btn-red" onclick="clearText()">清空内容</button>
-            <textarea id="keyOutput" placeholder="生成密钥自动显示"></textarea>
-
-            <h3>🔍 密钥有效性验证</h3>
-            <input class="inp" id="pubCheckKey" placeholder="粘贴密钥验证">
-            <button class="btn btn-green" onclick="publicCheckKey()">立即验证</button>
+        <hr style="margin:10px 0;">
+        <h4 data-lang="adminGiveKey">4.管理员发放密钥</h4>
+        <input type="text" id="giveKeyAcc" data-placeholder="keyAccPlaceholder" placeholder="指定用户账号">
+        <input type="number" id="keyNum" data-placeholder="keyNumPlaceholder" placeholder="密钥数量">
+        <input type="number" id="keyValidDay" data-placeholder="validDayPlaceholder" placeholder="有效天数">
+        <div class="flex">
+            <button onclick="assignUserKey()" data-lang="assignKeyBtn">指定发放密钥</button>
+            <button onclick="randomUserKey()" data-lang="randomKeyBtn">随机抽取用户发密钥</button>
         </div>
 
-        <div class="box-right admin-hide" id="adminPanel">
-            <h3>⚙️ 超级管理员后台</h3>
-            
-            <!-- 新增用户&黑名单查询区域 -->
-            <div class="query-box">
-                <input class="inp" id="searchUserAcc" placeholder="输入账号查询信息">
-                <button class="btn btn-green" onclick="searchUserInfo()">查询账号详情</button>
-                <br>
-                <button class="btn btn-orange" onclick="getAllBlackList()">一键查看全部黑名单</button>
-            </div>
+        <hr style="margin:10px 0;">
+        <h4 data-lang="groupManage">5.群聊管理权限</h4>
+        <input type="text" id="forceGroupId" data-placeholder="groupIdPlaceholder" placeholder="输入群聊ID强行加入">
+        <button onclick="adminForceJoinGroup()" data-lang="forceJoinBtn">强行入群并置顶管理</button>
 
-            <button class="btn btn-green" onclick="showAllUserList()">列出全部注册用户</button>
-            <button class="btn btn-red" onclick="unbanThisDevice()">解封当前设备</button>
-            
-            <div class="user-list-box" id="userListBox"></div>
+        <hr style="margin:10px 0;">
+        <h4 data-lang="antiCheat">6.系统反作弊监控</h4>
+        <button onclick="checkCheatSystem()" data-lang="checkCheatBtn">一键检测违规作弊用户</button>
+        <div id="cheatResult"></div>
 
-            <input class="inp" id="setVipUser" placeholder="输入账号开通会员">
-            <button class="btn btn-vip" onclick="setUserVip()">开通30天会员（已付款后操作）</button>
-            
-            <input class="inp" id="checkKeyInput" placeholder="输入密钥管理">
-            <br>
-            <button class="btn btn-green" onclick="checkKeyState()">查询密钥状态</button>
-            <button class="btn btn-red" onclick="blackListKey()">封禁指定密钥</button>
-            
-            <textarea id="dataBaseView"></textarea>
-            <p>总密钥:<span id="allNum">0</span> | 已用:<span id="usedNum">0</span> | 封禁:<span id="banNum">0</span> | 过期:<span id="outTimeNum">0</span></p>
-        </div>
-    </div>
+        <hr style="margin:10px 0;">
+        <h4>7.信封消息管理</h4>
+        <div id="envelopeList"></div>
 
-    <div class="footer-help">
-        <button class="btn btn-help" onclick="openWhatsAppHelp()">📞 问题帮助反馈</button>
-        <p style="font-size:12px;color:#999;margin-top:10px">自动跳转WhatsApp联系</p>
+        <button onclick="adminLogout()" style="margin-top:15px;" data-lang="adminLogoutBtn">退出管理后台</button>
     </div>
 </div>
 
 <script>
-// 超级管理员固定密码 永久无限制
-const MASTER_PWD = "0189597579";
-const WHATSAPP_NUM = "60189597579";
-const SAFE_KEY = "Delta_Vip_System_2026";
-let isAdmin = false, isUserLogin = false, currentUser = "";
-const DEVICE_ID_KEY = "Delta_Device_Only";
-
-function getDeviceID(){
-    let d = localStorage.getItem(DEVICE_ID_KEY);
-    if(!d) d = "DEV"+Math.random().toString(36).slice(2);
-    localStorage.setItem(DEVICE_ID_KEY,d);
-    return d;
-}
-const DEV_ID = getDeviceID();
-
-function safeSet(k,v){localStorage.setItem(SAFE_KEY+k,v)}
-function safeGet(k){return localStorage.getItem(SAFE_KEY+k)}
-function safeDel(k){localStorage.removeItem(SAFE_KEY+k)}
-
-let KeyData = JSON.parse(safeGet("KeyData"))||{all:[],used:[],ban:[],over:[],createDate:{},userMakeTime:{}};
-let UserData = JSON.parse(safeGet("UserData"))||[];
-let BlackData = JSON.parse(safeGet("BlackData"))||[];
-let VipData = JSON.parse(safeGet("VipData"))||{};
-let VipKeyCount = JSON.parse(safeGet("VipKeyCount"))||{}; // 会员当月已生成次数
-
-function saveAll(){
-    safeSet("KeyData",JSON.stringify(KeyData));
-    safeSet("UserData",JSON.stringify(UserData));
-    safeSet("BlackData",JSON.stringify(BlackData));
-    safeSet("VipData",JSON.stringify(VipData));
-    safeSet("VipKeyCount",JSON.stringify(VipKeyCount));
-}
-
-// 超级管理员登录（修复版：直接进入页面）
-function masterLogin(){
-    let p = document.getElementById("masterPwd").value.trim();
-    if(p === MASTER_PWD){
-        // 强制设置状态
-        isAdmin = true;
-        isUserLogin = true;
-        currentUser = "Delta-Key-Help 超级管理员";
-
-        // 直接修改DOM，显示后台
-        document.getElementById("authArea").style.display = "none";
-        document.getElementById("userInfo").style.display = "block";
-        document.getElementById("currentUser").innerText = currentUser;
-        document.getElementById("mainContent").classList.remove("hide-content");
-        document.getElementById("adminPanel").style.display = "block";
-        document.getElementById("vipBox").style.display = "block";
-
-        // 刷新数据
-        refreshData();
-
-        alert("✅ 超级管理员登录成功，全部权限解锁");
-    }else{
-        alert("❌ 超级管理员密码错误");
-    }
-}
-
-// 1. 精准查询单个用户账号信息
-function searchUserInfo(){
-    if(!isAdmin)return alert("请先登录超级管理员");
-    let acc = document.getElementById("searchUserAcc").value.trim().toLowerCase();
-    let user = UserData.find(item=>item.acc === acc);
-    if(!user){
-        alert("未查询到此注册账号");
-        return;
-    }
-    let vipStatus = VipData[acc] ? "已开通会员（30天有效期）" : "普通用户";
-    let info = `
-账号：${user.acc}
-注册密码：${user.pwd}
-绑定设备ID：${user.dev}
-注册时间：${user.time}
-账号状态：${vipStatus}
-    `;
-    alert(info);
-}
-
-// 2. 一键查看全部黑名单设备
-function getAllBlackList(){
-    if(!isAdmin)return alert("请先登录超级管理员");
-    if(BlackData.length === 0){
-        document.getElementById("userListBox").innerHTML = "暂无任何封禁设备";
-        return;
-    }
-    let str = "全部黑名单设备ID：\n"+BlackData.join("\n");
-    document.getElementById("userListBox").innerHTML = str;
-}
-
-// 解封本机
-function unbanThisDevice(){
-    BlackData = BlackData.filter(id => id !== DEV_ID);
-    saveAll();
-    alert("✅ 当前设备已从黑名单移除");
-    getAllBlackList();
-}
-
-// 公共跳转
-function openWhatsAppHelp(){
-    let txt = encodeURIComponent("我遇到了使用问题");
-    window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
-}
-function openVipChat(){
-    let txt = encodeURIComponent("我要开通月度会员RM10");
-    window.open(`https://wa.me/${WHATSAPP_NUM}?text=${txt}`);
-}
-
-// 普通用户注册登录
-function showRegisterForm(){
-    if(UserData.find(x=>x.dev===DEV_ID))return alert("该设备已注册，禁止多号");
-    document.getElementById("loginForm").style.display="none";
-    document.getElementById("registerForm").style.display="block";
-}
-function showLoginForm(){
-    document.getElementById("registerForm").style.display="none";
-    document.getElementById("loginForm").style.display="block";
-}
-function userRegister(){
-    let u = document.getElementById("regUser").value.trim().toLowerCase();
-    let p = document.getElementById("regPass").value.trim();
-    if(!u.endsWith("@gmail.com"))return alert("账号必须后缀@gmail.com");
-    if(p.length<6)return alert("密码最少6位");
-    if(UserData.find(x=>x.acc===u))return alert("账号已被注册");
-    UserData.push({acc:u,pwd:p,dev:DEV_ID,time:new Date().toLocaleString()});
-    saveAll();alert("注册成功");showLoginForm();
-}
-function userLogin(){
-    let u = document.getElementById("loginUser").value.trim().toLowerCase();
-    let p = document.getElementById("loginPass").value.trim();
-    let find = UserData.find(x=>x.acc===u&&x.pwd===p&&x.dev===DEV_ID);
-    if(!find)return alert("账号密码或设备不匹配");
-    safeSet("LoginUser",u);
-    isUserLogin=true;currentUser=u;
-    document.getElementById("authArea").style.display="none";
-    document.getElementById("userInfo").style.display="block";
-    document.getElementById("currentUser").innerText=u;
-    document.getElementById("mainContent").classList.remove("hide-content");
-    document.getElementById("vipBox").style.display="block";
-    checkVipStatus();checkMakeLimit();
-}
-function userLogout(){
-    safeDel("LoginUser");
-    isAdmin=false;isUserLogin=false;currentUser="";
-    document.getElementById("authArea").style.display="block";
-    document.getElementById("userInfo").style.display="none";
-    document.getElementById("mainContent").classList.add("hide-content");
-    document.getElementById("adminPanel").style.display="none";
-    document.getElementById("vipBox").style.display="none";
-    showLoginForm();
-}
-
-function checkVipStatus(){
-    let vipTime = VipData[currentUser]||"";
-    let now = new Date();
-    let vipEnd = new Date(vipTime);
-    let stateDom = document.getElementById("userVipState");
-    if(!vipTime||now>vipEnd){
-        stateDom.innerText="普通用户";stateDom.style.color="#ccc";
-    }else{
-        stateDom.innerText="💜 月度会员生效";stateDom.style.color="#9333ea";
-    }
-}
-
-function getZeroTime(d){
-    let t=new Date(d);
-    return new Date(t.getFullYear(),t.getMonth(),t.getDate(),0,0,0).getTime();
-}
-
-// 关键：会员/普通用户生成次数控制
-function checkMakeLimit(){
-    let last = KeyData.userMakeTime[currentUser]||"";
-    let now = new Date();
-    let isVip = VipData[currentUser] && new Date(VipData[currentUser])>now;
-
-    if(!last){
-        document.getElementById("keyLimitTip").innerText="可正常生成密钥";
-        document.getElementById("createKeyBtn").disabled=false;
-        return;
-    }
-
-    let lastZero = getZeroTime(last);
-    let nowZero = getZeroTime(now);
-    let day = Math.floor((nowZero-lastZero)/(1000*60*60*24));
-
-    // 普通用户：7天/1次
-    if(!isVip){
-        if(day<7){
-            document.getElementById("keyLimitTip").innerText=`普通用户剩余${7-day}天0点后可再生成`;
-            document.getElementById("createKeyBtn").disabled=true;
-        }else{
-            document.getElementById("keyLimitTip").innerText="冷却结束，可重新生成";
-            document.getElementById("createKeyBtn").disabled=false;
-        }
-    }else{
-        // 会员用户：30天/2次
-        let count = VipKeyCount[currentUser] || 0;
-        if(count>=2){
-            document.getElementById("keyLimitTip").innerText="本月会员次数已用完，下月重置";
-            document.getElementById("createKeyBtn").disabled=true;
-        }else{
-            document.getElementById("keyLimitTip").innerText=`会员用户本月还可生成${2-count}次`;
-            document.getElementById("createKeyBtn").disabled=false;
-        }
-    }
-}
-
-function getRandKey(){
-    let s="0123456789abcdef",str="";
-    for(let i=0;i<32;i++)str+=s[Math.floor(Math.random()*16)];
-    return "FREE_"+str;
-}
-function createOneKey(){
-    if(!isUserLogin)return alert("请先登录");
-    let last = KeyData.userMakeTime[currentUser]||"";
-    let now = new Date();
-    let isVip = VipData[currentUser] && new Date(VipData[currentUser])>now;
-
-    // 普通用户冷却检查
-    if(!isVip && last){
-        let lastZero = getZeroTime(last);
-        let nowZero = getZeroTime(now);
-        let day = Math.floor((nowZero-lastZero)/(1000*60*60*24));
-        if(day<7)return alert("未满7天凌晨0点，暂时无法生成");
-    }
-
-    // 会员次数检查
-    if(isVip){
-        let count = VipKeyCount[currentUser] || 0;
-        if(count>=2)return alert("本月会员生成次数已用完");
-        VipKeyCount[currentUser] = count + 1;
-    }
-
-    let k=getRandKey();
-    KeyData.all.push(k);
-    KeyData.createDate[k]=new Date().toLocaleDateString();
-    KeyData.userMakeTime[currentUser]=new Date().toLocaleDateString();
-    saveAll();
-    document.getElementById("keyOutput").value+=k+"\n";
-    checkMakeLimit();refreshData();
-}
-function clearText(){document.getElementById("keyOutput").value=""}
-function publicCheckKey(){
-    if(!isUserLogin)return;
-    let k=document.getElementById("pubCheckKey").value.trim();
-    if(!k.startsWith("FREE_"))return alert("密钥格式错误");
-    if(KeyData.ban.includes(k))return alert("已被封禁");
-    if(KeyData.used.includes(k))return alert("已使用失效");
-    if(KeyData.all.includes(k)){
-        alert("✅ 密钥有效");
-        KeyData.used.push(k);saveAll();refreshData();
-    }else alert("无效密钥");
-}
-
-function showAllUserList(){
-    if(!isAdmin)return;
-    let h="";UserData.forEach((x,i)=>h+=`${i+1} 账号：${x.acc}\n`);
-    document.getElementById("userListBox").innerHTML=h;
-}
-
-// 关键：你手动给已付款的用户开通会员
-function setUserVip(){
-    if(!isAdmin)return;
-    let u=document.getElementById("setVipUser").value.trim().toLowerCase();
-    if(!UserData.find(x=>x.acc===u)){
-        alert("该账号不存在");
-        return;
-    }
-    let endTime = new Date(Date.now()+30*24*60*60*1000).toLocaleString();
-    VipData[u]=endTime;
-    VipKeyCount[u]=0; // 重置当月次数
-    saveAll();
-    alert(`✅ 已为账号 ${u} 开通30天会员，本月可生成2次密钥`);
-}
-
-function checkKeyState(){}
-function blackListKey(){
-    if(!isAdmin)return;
-    let k=document.getElementById("checkKeyInput").value.trim();
-    if(!KeyData.ban.includes(k)){KeyData.ban.push(k);saveAll();refreshData();}
-}
-function refreshData(){
-    document.getElementById("allNum").innerText=KeyData.all.length;
-    document.getElementById("usedNum").innerText=KeyData.used.length;
-    document.getElementById("banNum").innerText=KeyData.ban.length;
-    document.getElementById("outTimeNum").innerText=KeyData.over.length;
-}
-
-window.onload=function(){
-    let u = safeGet("LoginUser");
-    if(u && !BlackData.includes(DEV_ID)){
-        isUserLogin=true;currentUser=u;
-        document.getElementById("authArea").style.display="none";
-        document.getElementById("userInfo").style.display="block";
-        document.getElementById("currentUser").innerText=u;
-        document.getElementById("mainContent").classList.remove("hide-content");
-        document.getElementById("vipBox").style.display="block";
-        checkVipStatus();checkMakeLimit();
+// ========== 多语言配置 ==========
+const langData = {
+    zh:{
+        langText:"切换语言",
+        loginTitle:"账号登录注册",
+        mailPlaceholder:"专属@gmail邮箱账号",
+        pwdPlaceholder:"设置登录密码",
+        avatarPlaceholder:"上传头像链接(空则随机头像)",
+        birthPlaceholder:"选择出生日期",
+        regBtn:"注册账号",
+        loginBtn:"立即登录",
+        userCenter:"个人用户中心",
+        genKeyBtn:"生成可用密钥",
+        socialTitle:"社交聊天功能",
+        friendPlaceholder:"输入好友邮箱账号",
+        applyFriend:"发送好友申请",
+        chatBtn:"好友聊天",
+        voiceCall:"语音通话",
+        videoCall:"视频通话",
+        groupPlaceholder:"创建群聊名称",
+        createGroupBtn:"创建新群聊",
+        officialGroupTitle:"官方全员固定大群(无法退出)",
+        logoutBtn:"退出登录",
+        adminLoginTitle:"管理员专属登录",
+        adminAccPlaceholder:"管理员账号",
+        adminPwdPlaceholder:"管理员密码",
+        enterAdmin:"进入管理面板",
+        adminBack:"超级管理员后台",
+        createAccAdmin:"1.手动无限创建账号",
+        newAccPlaceholder:"新建邮箱账号",
+        newPwdPlaceholder:"新建账号密码",
+        makeAccBtn:"创建账号",
+        grantMember:"2.授予会员权限",
+        grantAccPlaceholder:"填写用户邮箱账号",
+        monthMemberBtn:"授予月会员(RM10)",
+        yearMemberBtn:"授予年会员(RM120)",
+        blackManage:"3.黑名单管理",
+        blackUserPlaceholder:"操作用户账号",
+        addBlackBtn:"加入黑名单",
+        delBlackBtn:"解除黑名单",
+        viewBlackBtn:"查看黑名单",
+        adminGiveKey:"4.管理员发放密钥",
+        keyAccPlaceholder:"指定用户账号",
+        keyNumPlaceholder:"密钥数量",
+        validDayPlaceholder:"有效天数",
+        assignKeyBtn:"指定发放密钥",
+        randomKeyBtn:"随机抽取用户发密钥",
+        groupManage:"5.群聊管理权限",
+        groupIdPlaceholder:"输入群聊ID强行加入",
+        forceJoinBtn:"强行入群并置顶管理",
+        antiCheat:"6.系统反作弊监控",
+        checkCheatBtn:"一键检测违规作弊用户",
+        adminLogoutBtn:"退出管理后台",
+        alert_empty:"信息不能为空",
+        alert_gmail:"必须使用@gmail邮箱注册",
+        alert_accExist:"账号已存在",
+        alert_under13:"未满13岁自动拉入黑名单",
+        alert_regSuccess:"注册成功，可登录",
+        alert_noAcc:"账号不存在",
+        alert_pwdError:"密码错误",
+        alert_blackBan:"账号被拉黑禁止登录",
+        alert_cheatBan:"检测到作弊行为，已拉入黑名单",
+        alert_blackExist:"用户已在黑名单内",
+        alert_blackNoExist:"用户不在黑名单",
+        alert_blackAddSuccess:"成功加入黑名单",
+        alert_blackDelSuccess:"成功解除黑名单",
+        alert_grantSuccess:"会员权限授予成功",
+        alert_keyGiveSuccess:"密钥发放成功",
+        alert_ticketSuccess:"问题已提交，管理员会尽快回复"
+    },
+    en:{
+        langText:"Switch Language",
+        loginTitle:"Account Login & Register",
+        mailPlaceholder:"Your @gmail account",
+        pwdPlaceholder:"Set password",
+        avatarPlaceholder:"Avatar link(blank for random)",
+        birthPlaceholder:"Select birthday",
+        regBtn:"Register",
+        loginBtn:"Login",
+        userCenter:"User Center",
+        genKeyBtn:"Generate Key",
+        socialTitle:"Social Chat",
+        friendPlaceholder:"Friend email account",
+        applyFriend:"Send Friend Request",
+        chatBtn:"Chat",
+        voiceCall:"Voice Call",
+        videoCall:"Video Call",
+        groupPlaceholder:"Group name",
+        createGroupBtn:"Create Group",
+        officialGroupTitle:"Official Global Group (Cannot Exit)",
+        logoutBtn:"Logout",
+        adminLoginTitle:"Admin Login",
+        adminAccPlaceholder:"Admin Account",
+        adminPwdPlaceholder:"Admin Password",
+        enterAdmin:"Enter Admin Panel",
+        adminBack:"Super Admin Panel",
+        createAccAdmin:"1. Create Unlimited Account",
+        newAccPlaceholder:"New email account",
+        newPwdPlaceholder:"New password",
+        makeAccBtn:"Create Account",
+        grantMember:"2. Grant Membership",
+        grantAccPlaceholder:"User email account",
+        monthMemberBtn:"Monthly Member(RM10)",
+        yearMemberBtn:"Yearly Member(RM120)",
+        blackManage:"3. Blacklist Manage",
+        blackUserPlaceholder:"Target account",
+        addBlackBtn:"Add Blacklist",
+        delBlackBtn:"Remove Blacklist",
+        viewBlackBtn:"View Blacklist",
+        adminGiveKey:"4. Admin Distribute Key",
+        keyAccPlaceholder:"Target user account",
+        keyNumPlaceholder:"Key quantity",
+        validDayPlaceholder:"Valid days",
+        assignKeyBtn:"Assign Key",
+        randomKeyBtn:"Random Distribute Key",
+        groupManage:"5. Group Permission Manage",
+        groupIdPlaceholder:"Group ID to force join",
+        forceJoinBtn:"Force Join & Set Admin",
+        antiCheat:"6. Anti-Cheat System",
+        checkCheatBtn:"Detect Cheating User",
+        adminLogoutBtn:"Exit Admin",
+        alert_empty:"Cannot leave empty",
+        alert_gmail:"Only @gmail account allowed",
+        alert_accExist:"Account already exists",
+        alert_under13:"Under 13, added to blacklist",
+        alert_regSuccess:"Register success, please login",
+        alert_noAcc:"Account not found",
+        alert_pwdError:"Wrong password",
+        alert_blackBan:"Banned account, login denied",
+        alert_cheatBan:"Cheating detected, banned",
+        alert_blackExist:"User already in blacklist",
+        alert_blackNoExist:"User not in blacklist",
+        alert_blackAddSuccess:"Added to blacklist successfully",
+        alert_blackDelSuccess:"Removed from blacklist successfully",
+        alert_grantSuccess:"Membership granted successfully",
+        alert_keyGiveSuccess:"Keys distributed successfully",
+        alert_ticketSuccess:"Problem submitted, admin will reply soon"
     }
 };
-</script>
-</body>
-</html>
+let currentLang = "zh";
+
+// 语言切换函数
+function switchLanguage(){
+    currentLang = document.getElementById("langSelect").value;
+    let lang = langData[currentLang];
+    document.querySelectorAll("[data-lang]").forEach(el=>{
+        let key = el.getAttribute("data-lang");
+        el.innerText = lang[key];
+    });
+    document.querySelectorAll("[data-placeholder]").forEach(el=>{
+        let key = el.getAttribute("data-placeholder");
+        el.placeholder = lang[key];
+    });
+}
+
+// ========== 全局存储数据 ==========
+let users = JSON.parse(localStorage.getItem("sysUsers")) || {};
+let keysData = JSON.parse(localStorage.getItem("sysKeys")) || {};
+let blackList = JSON.parse(localStorage.getItem("sysBlack")) || [];
+let friendList = JSON.parse(localStorage.getItem("sysFriend")) || {};
+let groupList = JSON.parse(localStorage.getItem("sysGroup")) || [];
+let tickets = JSON.parse(localStorage.getItem("sysTickets")) || [];
+let officialGroup = {id:"official001",name:"官方全员大群",member:[],noQuit:true};
+let currentLoginUser = null;
+
+// 管理员账号密码
+const ADMIN_ACCOUNT = "0189597579";
+const ADMIN_PASSWORD = "0102030405060708090";
+
+// 会员配置参数
+const MONTH_PRICE = 10;
+const YEAR_PRICE = 120;
+const MONTH_KEY_NUM = 2;
+const MONTH_KEY_VALID = 60;
+const YEAR_CREATE_ACC_NUM = 2;
+const NORMAL_KEY_RESET_DAY = 7;
+
+// 保存所有数据
+function saveAllData(){
+    localStorage.setItem("sysUsers",JSON.stringify(users));
+    localStorage.setItem("sysKeys",JSON.stringify(keysData));
+    localStorage.setItem("sysBlack",JSON.stringify(blackList));
+    localStorage.setItem("sysFriend",JSON.stringify(friendList));
+    localStorage.setItem("sysGroup",JSON.stringify(groupList));
+    localStorage.setItem("sysTickets",JSON.stringify(tickets));
+}
+
+// 生成分段随机ID
+function createRandomID(){
+    let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let id = "";
+    for(let i=0;i<12;i++){
+        id += str.charAt(Math.floor(Math.random()*str.length));
+    }
+    return id.slice(0,4)+" "+id.slice(4,8)+" "+id.slice(8,12);
+}
+
+// 获取随机头像
+function getRandomAvatar(){
+    let avatarArr = [
+        "https://picsum.photos/100/100?random=1",
+        "https://picsum.photos/100/100?random=2",
+        "https://picsum.photos/100/100?random=3"
+    ];
+    return avatarArr[Math.floor(Math.random()*avatarArr.length)];
+}
+
+// 计算年龄
+function getUserAge(birth){
+    let birthDate = new Date(birth);
+    let now = new Date();
+    let age = now.getFullYear() - birthDate.getFullYear();
+    let m = now.getMonth() - birthDate.getMonth();
+    if(m<0 || (m===0 && now.getDate()<birthDate.getDate())) age--;
+    return age;
+}
+
+// 用户注册
+function userRegister(){
+    let mail = document.getElementById("regMail").value.trim();
+    let pwd = document.getElementById("regPwd").value.trim();
+    let avatar = document.getElementById("userAvatar").value.trim();
+    let birth = document.getElementById("birthDay").value;
+    let lang = langData[currentLang];
+
+    if(!mail || !pwd || !birth){
+        alert(lang.alert_empty);
+        return;
+    }
+    if(!mail.includes("@gmail.com")){
+        alert(lang.alert_gmail);
+        return;
+    }
+    if(users[mail]){
+        alert(lang.alert_accExist);
+        return;
+    }
+
+    let age = getUserAge(birth);
+    let userID = createRandomID();
+    let userAvatar = avatar || getRandomAvatar();
+    let isChildBan = age < 13;
+
+    let userInfo = {
+        uid:userID,
+        email:mail,
+        password:pwd,
+        avatar:userAvatar,
+        birth:birth,
+        age:age,
+        isBlack:isChildBan,
+        memberType:"normal",
+        memberStack:0,
+        keyStock:0,
+        lastKeyUse:new Date().getTime(),
+        createAccNum:0
+    };
+    users[mail] = userInfo;
+    if(isChildBan) blackList.push(mail);
+    saveAllData();
+    if(isChildBan){
+        alert(lang.alert_under13);
+    }else{
+        alert(lang.alert_regSuccess);
+    }
+}
+
+// 用户登录
+function userLogin(){
+    let mail = document.getElementById("regMail").value.trim();
+    let pwd = document.getElementById("regPwd").value.trim();
+    let lang = langData[currentLang];
+
+    if(!users[mail]){
+        alert(lang.alert_noAcc);
+        return;
+    }
+    if(users[mail].password !== pwd){
+        alert(lang.alert_pwdError);
+        return;
+    }
+    if(blackList.includes(mail)){
+        alert(lang.alert_blackBan);
+        return;
+    }
+
+    currentLoginUser = mail;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("userPanel").style.display = "block";
+    renderUserInfo();
+}
+
+// 渲染用户信息
+function renderUserInfo(){
+    let u = users[currentLoginUser];
+    document.getElementById("userInfo").innerText =
+    `个人ID：${u.uid}\n邮箱账号：${u.email}\n出生日期：${u.birth}`;
+}
+
+// 退出普通账号
+function logoutSys(){
+    currentLoginUser = null;
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("userPanel").style.display = "none";
+}
+
+// 管理员登录
+function adminLogin(){
+    let acc = document.getElementById("adminAcc").value.trim();
+    let pwd = document.getElementById("adminPwd").value.trim();
+    if(acc === ADMIN_ACCOUNT && pwd === ADMIN_PASSWORD){
+        document.getElementById("adminLoginBox").style.display = "none";
+        document.getElementById("adminPanel").style.display = "block";
+        refreshEnvelopeCount();
+    }else{
+        alert("账号密码错误");
+    }
+}
+
+// 管理员退出
+function adminLogout(){
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("adminLoginBox").style.display = "block";
+}
+
+// 管理员手动创建账号
+function adminCreateAccount(){
+    let mail = document.getElementById("makeAcc").value.trim();
+    let pwd = document.getElementById("makePwd").value.trim();
+    if(!mail||!pwd||!mail.includes("@gmail.com")){
+        alert("请填写合法gmail账号与密码");
+        return;
+    }
+    if(users[mail]){
+        alert("账号已存在");
+        return;
+    }
+    let userID = createRandomID();
+    let userAvatar = getRandomAvatar();
+    users[mail] = {
+        uid:userID,
+        email:mail,
+        password:pwd,
+        avatar:userAvatar,
+        birth:"",
+        age:0,
+        isBlack:false,
+        memberType:"normal",
+        memberStack:0,
+        keyStock:0,
+        lastKeyUse:new Date().getTime(),
+        createAccNum:0
+    };
+    saveAllData();
+    alert("账号创建成功");
+}
+
+// 授予月会员
+function giveMonthMember(){
+    let acc = document.getElementById("grantAcc").value.trim();
+    if(!users[acc]){
+        alert("用户不存在");
+        return;
+    }
+    let user = users[acc];
+    user.memberType = "month";
+    user.memberStack += 1;
+    user.keyStock += MONTH_KEY_NUM;
+    saveAllData();
+    alert(langData[currentLang].alert_grantSuccess);
+}
+
+// 授予年会员
+function giveYearMember(){
+    let acc = document.getElementById("grantAcc").value.trim();
+    if(!users[acc]){
+        alert("用户不存在");
+        return;
+    }
+    let user = users[acc];
+    user.memberType = "year";
+    user.memberStack += 1;
+    user.keyStock += MONTH_KEY_NUM;
+    user.createAccNum += YEAR_CREATE_ACC_NUM;
+    saveAllData();
+    alert(langData[currentLang].alert_grantSuccess);
+}
+
+// 加入黑名单
+function addBlackUser(){
+    let acc = document.getElementById("blackUser").value.trim();
+    if(!acc)return alert("请输入账号");
+    if(blackList.includes(acc))return alert(langData[currentLang].alert_blackE
