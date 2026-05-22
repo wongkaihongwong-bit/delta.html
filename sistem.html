@@ -20,7 +20,6 @@ h3{margin:10px 0;}
 </head>
 <body>
 <div id="app">
-    <!-- 语言切换栏 -->
     <div class="lang-box">
         <span data-lang="langText">切换语言</span>：
         <select id="langSelect" onchange="switchLanguage()">
@@ -29,7 +28,6 @@ h3{margin:10px 0;}
         </select>
     </div>
 
-    <!-- 登录注册首页 -->
     <div id="loginBox" class="box">
         <h3 data-lang="loginTitle">账号登录注册</h3>
         <input type="email" id="regMail" data-placeholder="mailPlaceholder" placeholder="专属@gmail邮箱账号">
@@ -42,7 +40,6 @@ h3{margin:10px 0;}
         </div>
     </div>
 
-    <!-- 普通用户中心 -->
     <div id="userPanel" class="box" style="display:none">
         <h3 data-lang="userCenter">个人用户中心</h3>
         <p id="userInfo"></p>
@@ -65,7 +62,6 @@ h3{margin:10px 0;}
         <h4 data-lang="officialGroupTitle">官方全员固定大群(无法退出)</h4>
         <div id="officialGroupChat"></div>
 
-        <!-- Roblox风格问题提交表单 -->
         <hr style="margin:15px 0;">
         <h4>提交问题给管理员</h4>
         <input type="email" id="ticketUser" placeholder="用户名（填写你的@gmail.com账号）">
@@ -86,15 +82,13 @@ h3{margin:10px 0;}
         <button onclick="logoutSys()" data-lang="logoutBtn">退出登录</button>
     </div>
 
-    <!-- 管理员登录入口 -->
     <div id="adminLoginBox" class="box">
         <h3 data-lang="adminLoginTitle">管理员专属登录</h3>
-        <input type="text" id="adminAcc" data-placeholder="adminAccPlaceholder" placeholder="管理员账号">
-        <input type="password" id="adminPwd" data-placeholder="adminPwdPlaceholder" placeholder="管理员密码">
+        <input type="text" id="adminAcc" placeholder="管理员账号：admin">
+        <input type="password" id="adminPwd" placeholder="管理员密码：123456">
         <button onclick="adminLogin()" data-lang="enterAdmin">进入管理面板</button>
     </div>
 
-    <!-- 管理员后台面板 -->
     <div id="adminPanel" class="box" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <h3 data-lang="adminBack">超级管理员后台</h3>
@@ -156,148 +150,61 @@ h3{margin:10px 0;}
 </div>
 
 <script>
-// ========== 多语言配置 ==========
 const langData = {
     zh:{
-        langText:"切换语言",
-        loginTitle:"账号登录注册",
-        mailPlaceholder:"专属@gmail邮箱账号",
-        pwdPlaceholder:"设置登录密码",
-        avatarPlaceholder:"上传头像链接(空则随机头像)",
-        birthPlaceholder:"选择出生日期",
-        regBtn:"注册账号",
-        loginBtn:"立即登录",
-        userCenter:"个人用户中心",
-        genKeyBtn:"生成可用密钥",
-        socialTitle:"社交聊天功能",
-        friendPlaceholder:"输入好友邮箱账号",
-        applyFriend:"发送好友申请",
-        chatBtn:"好友聊天",
-        voiceCall:"语音通话",
-        videoCall:"视频通话",
-        groupPlaceholder:"创建群聊名称",
-        createGroupBtn:"创建新群聊",
-        officialGroupTitle:"官方全员固定大群(无法退出)",
-        logoutBtn:"退出登录",
-        adminLoginTitle:"管理员专属登录",
-        adminAccPlaceholder:"管理员账号",
-        adminPwdPlaceholder:"管理员密码",
-        enterAdmin:"进入管理面板",
-        adminBack:"超级管理员后台",
-        createAccAdmin:"1.手动无限创建账号",
-        newAccPlaceholder:"新建邮箱账号",
-        newPwdPlaceholder:"新建账号密码",
-        makeAccBtn:"创建账号",
-        grantMember:"2.授予会员权限",
-        grantAccPlaceholder:"填写用户邮箱账号",
-        monthMemberBtn:"授予月会员(RM10)",
-        yearMemberBtn:"授予年会员(RM120)",
-        blackManage:"3.黑名单管理",
-        blackUserPlaceholder:"操作用户账号",
-        addBlackBtn:"加入黑名单",
-        delBlackBtn:"解除黑名单",
-        viewBlackBtn:"查看黑名单",
-        adminGiveKey:"4.管理员发放密钥",
-        keyAccPlaceholder:"指定用户账号",
-        keyNumPlaceholder:"密钥数量",
-        validDayPlaceholder:"有效天数",
-        assignKeyBtn:"指定发放密钥",
-        randomKeyBtn:"随机抽取用户发密钥",
-        groupManage:"5.群聊管理权限",
-        groupIdPlaceholder:"输入群聊ID强行加入",
-        forceJoinBtn:"强行入群并置顶管理",
-        antiCheat:"6.系统反作弊监控",
-        checkCheatBtn:"一键检测违规作弊用户",
-        adminLogoutBtn:"退出管理后台",
-        alert_empty:"信息不能为空",
-        alert_gmail:"必须使用@gmail邮箱注册",
-        alert_accExist:"账号已存在",
-        alert_under13:"未满13岁自动拉入黑名单",
-        alert_regSuccess:"注册成功，可登录",
-        alert_noAcc:"账号不存在",
-        alert_pwdError:"密码错误",
-        alert_blackBan:"账号被拉黑禁止登录",
-        alert_cheatBan:"检测到作弊行为，已拉入黑名单",
-        alert_blackExist:"用户已在黑名单内",
-        alert_blackNoExist:"用户不在黑名单",
-        alert_blackAddSuccess:"成功加入黑名单",
-        alert_blackDelSuccess:"成功解除黑名单",
-        alert_grantSuccess:"会员权限授予成功",
-        alert_keyGiveSuccess:"密钥发放成功",
-        alert_ticketSuccess:"问题已提交，管理员会尽快回复"
+        langText:"切换语言",loginTitle:"账号登录注册",mailPlaceholder:"专属@gmail邮箱账号",
+        pwdPlaceholder:"设置登录密码",avatarPlaceholder:"上传头像链接(空则随机头像)",
+        birthPlaceholder:"选择出生日期",regBtn:"注册账号",loginBtn:"立即登录",
+        userCenter:"个人用户中心",genKeyBtn:"生成可用密钥",socialTitle:"社交聊天功能",
+        friendPlaceholder:"输入好友邮箱账号",applyFriend:"发送好友申请",chatBtn:"好友聊天",
+        voiceCall:"语音通话",videoCall:"视频通话",groupPlaceholder:"创建群聊名称",
+        createGroupBtn:"创建新群聊",officialGroupTitle:"官方全员固定大群(无法退出)",
+        logoutBtn:"退出登录",adminLoginTitle:"管理员专属登录",adminAccPlaceholder:"管理员账号",
+        adminPwdPlaceholder:"管理员密码",enterAdmin:"进入管理面板",adminBack:"超级管理员后台",
+        createAccAdmin:"1.手动无限创建账号",newAccPlaceholder:"新建邮箱账号",newPwdPlaceholder:"新建账号密码",
+        makeAccBtn:"创建账号",grantMember:"2.授予会员权限",grantAccPlaceholder:"填写用户邮箱账号",
+        monthMemberBtn:"授予月会员(RM10)",yearMemberBtn:"授予年会员(RM120)",blackManage:"3.黑名单管理",
+        blackUserPlaceholder:"操作用户账号",addBlackBtn:"加入黑名单",delBlackBtn:"解除黑名单",
+        viewBlackBtn:"查看黑名单",adminGiveKey:"4.管理员发放密钥",keyAccPlaceholder:"指定用户账号",
+        keyNumPlaceholder:"密钥数量",validDayPlaceholder:"有效天数",assignKeyBtn:"指定发放密钥",
+        randomKeyBtn:"随机抽取用户发密钥",groupManage:"5.群聊管理权限",groupIdPlaceholder:"输入群聊ID强行加入",
+        forceJoinBtn:"强行入群并置顶管理",antiCheat:"6.系统反作弊监控",checkCheatBtn:"一键检测违规作弊用户",
+        adminLogoutBtn:"退出管理后台",alert_empty:"信息不能为空",alert_gmail:"必须使用@gmail邮箱注册",
+        alert_accExist:"账号已存在",alert_under13:"未满13岁自动拉入黑名单",alert_regSuccess:"注册成功，可登录",
+        alert_noAcc:"账号不存在",alert_pwdError:"密码错误",alert_blackBan:"账号被拉黑禁止登录",
+        alert_cheatBan:"检测到作弊行为，已拉入黑名单",alert_blackExist:"用户已在黑名单内",
+        alert_blackNoExist:"用户不在黑名单",alert_blackAddSuccess:"成功加入黑名单",
+        alert_blackDelSuccess:"成功解除黑名单",alert_grantSuccess:"会员权限授予成功",
+        alert_keyGiveSuccess:"密钥发放成功",alert_ticketSuccess:"问题已提交，管理员会尽快回复"
     },
     en:{
-        langText:"Switch Language",
-        loginTitle:"Account Login & Register",
-        mailPlaceholder:"Your @gmail account",
-        pwdPlaceholder:"Set password",
-        avatarPlaceholder:"Avatar link(blank for random)",
-        birthPlaceholder:"Select birthday",
-        regBtn:"Register",
-        loginBtn:"Login",
-        userCenter:"User Center",
-        genKeyBtn:"Generate Key",
-        socialTitle:"Social Chat",
-        friendPlaceholder:"Friend email account",
-        applyFriend:"Send Friend Request",
-        chatBtn:"Chat",
-        voiceCall:"Voice Call",
-        videoCall:"Video Call",
-        groupPlaceholder:"Group name",
-        createGroupBtn:"Create Group",
-        officialGroupTitle:"Official Global Group (Cannot Exit)",
-        logoutBtn:"Logout",
-        adminLoginTitle:"Admin Login",
-        adminAccPlaceholder:"Admin Account",
-        adminPwdPlaceholder:"Admin Password",
-        enterAdmin:"Enter Admin Panel",
-        adminBack:"Super Admin Panel",
-        createAccAdmin:"1. Create Unlimited Account",
-        newAccPlaceholder:"New email account",
-        newPwdPlaceholder:"New password",
-        makeAccBtn:"Create Account",
-        grantMember:"2. Grant Membership",
-        grantAccPlaceholder:"User email account",
-        monthMemberBtn:"Monthly Member(RM10)",
-        yearMemberBtn:"Yearly Member(RM120)",
-        blackManage:"3. Blacklist Manage",
-        blackUserPlaceholder:"Target account",
-        addBlackBtn:"Add Blacklist",
-        delBlackBtn:"Remove Blacklist",
-        viewBlackBtn:"View Blacklist",
-        adminGiveKey:"4. Admin Distribute Key",
-        keyAccPlaceholder:"Target user account",
-        keyNumPlaceholder:"Key quantity",
-        validDayPlaceholder:"Valid days",
-        assignKeyBtn:"Assign Key",
-        randomKeyBtn:"Random Distribute Key",
-        groupManage:"5. Group Permission Manage",
-        groupIdPlaceholder:"Group ID to force join",
-        forceJoinBtn:"Force Join & Set Admin",
-        antiCheat:"6. Anti-Cheat System",
-        checkCheatBtn:"Detect Cheating User",
-        adminLogoutBtn:"Exit Admin",
-        alert_empty:"Cannot leave empty",
-        alert_gmail:"Only @gmail account allowed",
-        alert_accExist:"Account already exists",
-        alert_under13:"Under 13, added to blacklist",
-        alert_regSuccess:"Register success, please login",
-        alert_noAcc:"Account not found",
-        alert_pwdError:"Wrong password",
-        alert_blackBan:"Banned account, login denied",
-        alert_cheatBan:"Cheating detected, banned",
-        alert_blackExist:"User already in blacklist",
-        alert_blackNoExist:"User not in blacklist",
-        alert_blackAddSuccess:"Added to blacklist successfully",
-        alert_blackDelSuccess:"Removed from blacklist successfully",
-        alert_grantSuccess:"Membership granted successfully",
-        alert_keyGiveSuccess:"Keys distributed successfully",
-        alert_ticketSuccess:"Problem submitted, admin will reply soon"
+        langText:"Switch Language",loginTitle:"Account Login & Register",mailPlaceholder:"Your @gmail account",
+        pwdPlaceholder:"Set password",avatarPlaceholder:"Avatar link(blank for random)",birthPlaceholder:"Select birthday",
+        regBtn:"Register",loginBtn:"Login",userCenter:"User Center",genKeyBtn:"Generate Key",
+        socialTitle:"Social Chat",friendPlaceholder:"Friend email account",applyFriend:"Send Friend Request",
+        chatBtn:"Chat",voiceCall:"Voice Call",videoCall:"Video Call",groupPlaceholder:"Group name",
+        createGroupBtn:"Create Group",officialGroupTitle:"Official Global Group (Cannot Exit)",logoutBtn:"Logout",
+        adminLoginTitle:"Admin Login",adminAccPlaceholder:"Admin Account",adminPwdPlaceholder:"Admin Password",
+        enterAdmin:"Enter Admin Panel",adminBack:"Super Admin Panel",createAccAdmin:"1. Create Unlimited Account",
+        newAccPlaceholder:"New email account",newPwdPlaceholder:"New password",makeAccBtn:"Create Account",
+        grantMember:"2. Grant Membership",grantAccPlaceholder:"User email account",monthMemberBtn:"Monthly Member(RM10)",
+        yearMemberBtn:"Yearly Member(RM120)",blackManage:"3. Blacklist Manage",blackUserPlaceholder:"Target account",
+        addBlackBtn:"Add Blacklist",delBlackBtn:"Remove Blacklist",viewBlackBtn:"View Blacklist",
+        adminGiveKey:"4. Admin Distribute Key",keyAccPlaceholder:"Target user account",keyNumPlaceholder:"Key quantity",
+        validDayPlaceholder:"Valid days",assignKeyBtn:"Assign Key",randomKeyBtn:"Random Distribute Key",
+        groupManage:"5. Group Permission Manage",groupIdPlaceholder:"Group ID to force join",forceJoinBtn:"Force Join & Set Admin",
+        antiCheat:"6. Anti-Cheat System",checkCheatBtn:"Detect Cheating User",adminLogoutBtn:"Exit Admin",
+        alert_empty:"Cannot leave empty",alert_gmail:"Only @gmail account allowed",alert_accExist:"Account already exists",
+        alert_under13:"Under 13, added to blacklist",alert_regSuccess:"Register success, please login",
+        alert_noAcc:"Account not found",alert_pwdError:"Wrong password",alert_blackBan:"Banned account, login denied",
+        alert_cheatBan:"Cheating detected, banned",alert_blackExist:"User already in blacklist",
+        alert_blackNoExist:"User not in blacklist",alert_blackAddSuccess:"Added to blacklist successfully",
+        alert_blackDelSuccess:"Removed from blacklist successfully",alert_grantSuccess:"Membership granted successfully",
+        alert_keyGiveSuccess:"Keys distributed successfully",alert_ticketSuccess:"Problem submitted, admin will reply soon"
     }
 };
 let currentLang = "zh";
 
-// 语言切换函数
 function switchLanguage(){
     currentLang = document.getElementById("langSelect").value;
     let lang = langData[currentLang];
@@ -311,7 +218,6 @@ function switchLanguage(){
     });
 }
 
-// ========== 全局存储数据 ==========
 let users = JSON.parse(localStorage.getItem("sysUsers")) || {};
 let keysData = JSON.parse(localStorage.getItem("sysKeys")) || {};
 let blackList = JSON.parse(localStorage.getItem("sysBlack")) || [];
@@ -321,11 +227,10 @@ let tickets = JSON.parse(localStorage.getItem("sysTickets")) || [];
 let officialGroup = {id:"official001",name:"官方全员大群",member:[],noQuit:true};
 let currentLoginUser = null;
 
-// 管理员账号密码
-const ADMIN_ACCOUNT = "0189597579";
-const ADMIN_PASSWORD = "0102030405060708090";
+// ↓↓↓ 这里改成最简单固定账号密码，不会错 ↓↓↓
+const ADMIN_ACCOUNT = "admin";
+const ADMIN_PASSWORD = "123456";
 
-// 会员配置参数
 const MONTH_PRICE = 10;
 const YEAR_PRICE = 120;
 const MONTH_KEY_NUM = 2;
@@ -333,7 +238,6 @@ const MONTH_KEY_VALID = 60;
 const YEAR_CREATE_ACC_NUM = 2;
 const NORMAL_KEY_RESET_DAY = 7;
 
-// 保存所有数据
 function saveAllData(){
     localStorage.setItem("sysUsers",JSON.stringify(users));
     localStorage.setItem("sysKeys",JSON.stringify(keysData));
@@ -343,7 +247,6 @@ function saveAllData(){
     localStorage.setItem("sysTickets",JSON.stringify(tickets));
 }
 
-// 生成分段随机ID
 function createRandomID(){
     let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let id = "";
@@ -353,17 +256,11 @@ function createRandomID(){
     return id.slice(0,4)+" "+id.slice(4,8)+" "+id.slice(8,12);
 }
 
-// 获取随机头像
 function getRandomAvatar(){
-    let avatarArr = [
-        "https://picsum.photos/100/100?random=1",
-        "https://picsum.photos/100/100?random=2",
-        "https://picsum.photos/100/100?random=3"
-    ];
+    let avatarArr = ["https://picsum.photos/100/100?random=1","https://picsum.photos/100/100?random=2","https://picsum.photos/100/100?random=3"];
     return avatarArr[Math.floor(Math.random()*avatarArr.length)];
 }
 
-// 计算年龄
 function getUserAge(birth){
     let birthDate = new Date(birth);
     let now = new Date();
@@ -373,7 +270,6 @@ function getUserAge(birth){
     return age;
 }
 
-// 用户注册
 function userRegister(){
     let mail = document.getElementById("regMail").value.trim();
     let pwd = document.getElementById("regPwd").value.trim();
@@ -423,7 +319,6 @@ function userRegister(){
     }
 }
 
-// 用户登录
 function userLogin(){
     let mail = document.getElementById("regMail").value.trim();
     let pwd = document.getElementById("regPwd").value.trim();
@@ -448,21 +343,19 @@ function userLogin(){
     renderUserInfo();
 }
 
-// 渲染用户信息
 function renderUserInfo(){
     let u = users[currentLoginUser];
     document.getElementById("userInfo").innerText =
     `个人ID：${u.uid}\n邮箱账号：${u.email}\n出生日期：${u.birth}`;
 }
 
-// 退出普通账号
 function logoutSys(){
     currentLoginUser = null;
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("userPanel").style.display = "none";
 }
 
-// 管理员登录
+// 管理员登录（最简单，不改任何东西）
 function adminLogin(){
     let acc = document.getElementById("adminAcc").value.trim();
     let pwd = document.getElementById("adminPwd").value.trim();
@@ -471,17 +364,15 @@ function adminLogin(){
         document.getElementById("adminPanel").style.display = "block";
         refreshEnvelopeCount();
     }else{
-        alert("账号密码错误");
+        alert("账号密码错误！账号：admin 密码：123456");
     }
 }
 
-// 管理员退出
 function adminLogout(){
     document.getElementById("adminPanel").style.display = "none";
     document.getElementById("adminLoginBox").style.display = "block";
 }
 
-// 管理员手动创建账号
 function adminCreateAccount(){
     let mail = document.getElementById("makeAcc").value.trim();
     let pwd = document.getElementById("makePwd").value.trim();
@@ -513,7 +404,6 @@ function adminCreateAccount(){
     alert("账号创建成功");
 }
 
-// 授予月会员
 function giveMonthMember(){
     let acc = document.getElementById("grantAcc").value.trim();
     if(!users[acc]){
@@ -528,7 +418,6 @@ function giveMonthMember(){
     alert(langData[currentLang].alert_grantSuccess);
 }
 
-// 授予年会员
 function giveYearMember(){
     let acc = document.getElementById("grantAcc").value.trim();
     if(!users[acc]){
@@ -544,8 +433,41 @@ function giveYearMember(){
     alert(langData[currentLang].alert_grantSuccess);
 }
 
-// 加入黑名单
 function addBlackUser(){
     let acc = document.getElementById("blackUser").value.trim();
     if(!acc)return alert("请输入账号");
-    if(blackList.includes(acc))return alert(langData[currentLang].alert_blackE
+    if(blackList.includes(acc))return alert(langData[currentLang].alert_blackExist);
+    blackList.push(acc);
+    if(users[acc]) users[acc].isBlack = true;
+    saveAllData();
+    alert(langData[currentLang].alert_blackAddSuccess);
+}
+
+function removeBlackUser(){
+    let acc = document.getElementById("blackUser").value.trim();
+    if(!acc)return alert("请输入账号");
+    if(!blackList.includes(acc))return alert(langData[currentLang].alert_blackNoExist);
+    blackList = blackList.filter(item=>item!==acc);
+    if(users[acc]) users[acc].isBlack = false;
+    saveAllData();
+    alert(langData[currentLang].alert_blackDelSuccess);
+}
+
+function viewBlackList(){
+    document.getElementById("blackListData").innerText = "黑名单列表："+blackList.join("、");
+}
+
+function assignUserKey(){
+    let acc = document.getElementById("giveKeyAcc").value.trim();
+    let num = parseInt(document.getElementById("keyNum").value) || 0;
+    let day = parseInt(document.getElementById("keyValidDay").value) || 1;
+    if(!acc||num<=0)return alert("填写正确信息");
+    if(!users[acc])return alert("用户不存在");
+    users[acc].keyStock += num;
+    saveAllData();
+    alert(langData[currentLang].alert_keyGiveSuccess);
+}
+
+function randomUserKey(){
+    let userArr = Object.keys(users);
+    if(user
