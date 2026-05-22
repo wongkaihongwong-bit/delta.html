@@ -32,6 +32,7 @@ th{background:#2a2f3b;}
 .key-show{word-break:break-all;color:#22c55e;font-weight:bold;}
 .feedback-card{background:#2a2f3b;padding:12px;border-radius:8px;margin:8px 0;}
 .reply-area{background:#334155;padding:10px;border-radius:4px;margin-top:8px;}
+.user-reply-box{background:#334155;padding:10px;border-radius:4px;margin-top:10px;color:#22c55e;}
 </style>
 </head>
 <body>
@@ -43,7 +44,7 @@ th{background:#2a2f3b;}
         <button onclick="switchTab('register')">账号注册</button>
         <button onclick="switchTab('keygen')">密钥生成</button>
         <button onclick="switchTab('vip')">会员中心</button>
-        <button onclick="switchTab('support')">客服反馈</button>
+        <button onclick="switchTab('support')">客服反馈 <span id="userFeedbackBadge" class="envelope-badge hide">0</span></button>
         <button onclick="switchTab('admin')">后台管理 <span id="envelopeBadge" class="envelope-badge hide">0</span></button>
     </div>
 
@@ -68,7 +69,7 @@ th{background:#2a2f3b;}
         <h3>新用户注册</h3>
         <input type="email" id="regUser" placeholder="设置专用邮箱（xxx@gmail.com）">
         <input type="password" id="regPwd" placeholder="设置密码">
-        <input type="text" id="regName" placeholder="输入昵称">
+        <input type="text" id="regName" placeholder="昵称仅支持字母、数字、下划线，禁止不良词汇">
         <input type="date" id="regBirthday" placeholder="出生日期">
         <button class="btn" onclick="userRegister()">提交注册</button>
     </div>
@@ -85,7 +86,7 @@ th{background:#2a2f3b;}
         <h3>会员套餐</h3>
         <p>月度会员 RM10：每月2次密钥，次数可叠加，有效期2个月</p>
         <p>年度会员 RM120：可创建2个子账号，每月2次密钥，可叠加</p>
-        <p>普通用户：7天未使用自动重置次数，不可叠加</p>
+        <p>普通用户：每天1次，最多累计2次，7天自动重置</p>
         <p style="margin:8px 0;color:#f59e0b">办理会员请联系：0189597579</p>
         <button class="btn btn-warning" onclick="vipBuy()">申请开通会员</button>
         <p style="margin-top:10px;">会员状态：<span id="vipStatus">普通用户</span></p>
@@ -107,6 +108,10 @@ th{background:#2a2f3b;}
         </select>
         <textarea id="supportProblem" placeholder="详细描述遇到的问题"></textarea>
         <button class="btn btn-admin" onclick="submitSupport()">提交反馈</button>
+
+        <hr style="margin:20px 0;">
+        <h4>我的反馈记录</h4>
+        <div id="userFeedbackList"></div>
     </div>
 
     <div id="admin" class="box">
@@ -149,7 +154,7 @@ th{background:#2a2f3b;}
             <button class="btn btn-danger" onclick="delInvalidKey()">清理过期密钥</button>
             <p>系统密钥总数：<span id="keyTotal">0</span></p>
 
-            <h4 style="margin:15px 0 8px;">5.用户反馈信箱（可回复）</h4>
+            <h4 style="margin:15px 0 8px;">5.用户反馈信箱（仅显示未处理）</h4>
             <div id="supportList"></div>
             <button class="btn" onclick="refreshSupportList()">刷新反馈</button>
 
@@ -175,6 +180,11 @@ let supportList = JSON.parse(localStorage.getItem("sysSupport")) || [];
 let nowUser = null;
 let isAdmin = false;
 
+// 违规关键词库
+const badWords = ["脏话","辱骂","低俗","色情","暴力","骂人","垃圾","废物"];
+// 昵称合法正则：仅字母数字下划线
+const nameReg = /^[A-Za-z0-9_]+$/;
+
 // 生成Delta标准格式密钥 FREE_32位大小写数字
 function genDeltaKey(){
     const base = "0123456789abcdefABCDEF";
@@ -191,7 +201,10 @@ function switchTab(id){
     hideMsg();
     if(id==='admin' && !isAdmin) document.getElementById("adminPanel").classList.add("hide");
     if(id==='home') document.getElementById("noticeText").innerText = siteNotice;
-    if(id==='support') refreshSupportBadge();
+    if(id==='support'){
+        refreshSupportBadge();
+        loadUserFeedbackList();
+    }
 }
 
 function showMsg(text,type="success"){
@@ -205,21 +218,38 @@ function hideMsg(){
     document.getElementById("msgBox").style.display = "none";
 }
 
+// 检测是否包含不良词汇
+function hasBadWord(str){
+    let lowerStr = str.toLowerCase();
+    for(let word of badWords){
+        if(lowerStr.includes(word)) return true;
+    }
+    return false;
+}
+
 function userRegister(){
     let u = document.getElementById("regUser").value.trim();
     let p = document.getElementById("regPwd").value.trim();
     let n = document.getElementById("regName").value.trim();
     let b = document.getElementById("regBirthday").value;
-    if(!u||!p||!b) return showMsg("信息不能为空","error");
+
+    if(!u||!p||!b||!n) return showMsg("所有信息不能为空","error");
+    // 账号重复校验
+    if(userData.find(x=>x.user===u)) return showMsg("该账号已存在，无法重复注册","error");
+    // 昵称格式校验
+    if(!nameReg.test(n)) return showMsg("昵称仅允许字母、数字、下划线","error");
+    // 不良词汇检测
+    if(hasBadWord(n)) return showMsg("昵称包含违规不良用语，禁止注册","error");
+
     let birth = new Date(b);
     let age = new Date().getFullYear() - birth.getFullYear();
     if(age < 13) return showMsg("未满13岁自动拉入黑名单","error");
-    if(userData.find(x=>x.user===u)) return showMsg("账号已存在","error");
+
     let randomId = Math.random().toString(36).substr(2,3).toUpperCase()+" "+Math.random().toString(36).substr(2,3).toUpperCase()+" "+Math.random().toString(36).substr(2,3).toUpperCase();
     let avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${u}`;
     userData.push({
         user:u,pwd:p,name:n,birthday:b,id:randomId,avatar:avatar,
-        vip:false,vipType:"none",vipExpire:"",keyCount:0,keyMax:0,blacklist:false,
+        vip:false,vipType:"none",vipExpire:"",keyCount:0,keyMax:2,lastKeyDate:"",blacklist:false,
         registerTime:new Date().toLocaleString()
     });
     localStorage.setItem("sysUser",JSON.stringify(userData));
@@ -236,23 +266,43 @@ function userLogin(){
     document.getElementById("vipExpire").innerText = find.vipExpire || "无";
     document.getElementById("keyLeft").innerText = find.keyMax - find.keyCount;
     showMsg("登录成功");
+    refreshSupportBadge();
 }
 
 function createKey(){
     if(!nowUser) return showMsg("请先登录账号","error");
-    if(nowUser.keyCount >= nowUser.keyMax) return showMsg("密钥次数已用尽","error");
+
+    let today = new Date().toLocaleDateString();
+    // 普通用户：每天最多1次，最多累计2次
+    if(!nowUser.vip){
+        if(nowUser.lastKeyDate === today){
+            return showMsg("普通用户每天只能生成1个密钥","error");
+        }
+        if(nowUser.keyCount >= nowUser.keyMax){
+            return showMsg("普通用户最多累计2个密钥，用完等重置","error");
+        }
+        nowUser.lastKeyDate = today;
+    }
+
+    if(nowUser.keyCount >= nowUser.keyMax){
+        return showMsg("密钥次数已用尽","error");
+    }
+
     let newKey = genDeltaKey();
     let expire = new Date();
     expire.setDate(expire.getDate() + 60);
     keyList.push({code:newKey,user:nowUser.user,state:"未使用",time:new Date().toLocaleString(),expire:expire.toLocaleString(),days:60});
     nowUser.keyCount++;
     let idx = userData.findIndex(x=>x.user===nowUser.user);
-    userData[idx].keyCount = nowUser.keyCount;
+    userData[idx] = nowUser;
+
     localStorage.setItem("sysUser",JSON.stringify(userData));
     localStorage.setItem("sysKey",JSON.stringify(keyList));
+
     document.getElementById("keyResult").innerText = newKey;
     document.getElementById("keyTotal").innerText = keyList.length;
     document.getElementById("keyLeft").innerText = nowUser.keyMax - nowUser.keyCount;
+
     showMsg("Delta FREE密钥生成完成");
 }
 
@@ -266,30 +316,39 @@ function submitSupport(){
     let device = document.getElementById("supportDevice").value;
     let problem = document.getElementById("supportProblem").value.trim();
     if(!user||!problem) return showMsg("用户名和问题必填","error");
-    supportList.push({user,name,device,problem,time:new Date().toLocaleString(),read:false,reply:""});
+    supportList.push({user,name,device,problem,time:new Date().toLocaleString(),read:false,reply:"",userReadReply:false});
     localStorage.setItem("sysSupport",JSON.stringify(supportList));
     refreshSupportBadge();
     showMsg("反馈提交成功");
 }
+
+// 管理员端反馈列表（仅显示未处理）
 function refreshSupportBadge(){
     let unread = supportList.filter(x=>!x.read).length;
     let badge = document.getElementById("envelopeBadge");
     unread>0 ? (badge.innerText=unread,badge.classList.remove("hide")) : badge.classList.add("hide");
+
+    if(nowUser){
+        let userHasReply = supportList.filter(x=>x.user===nowUser.user && x.reply && !x.userReadReply).length;
+        let userBadge = document.getElementById("userFeedbackBadge");
+        userHasReply>0 ? (userBadge.innerText=userHasReply,userBadge.classList.remove("hide")) : userBadge.classList.add("hide");
+    }
 }
 function refreshSupportList(){
     let list = document.getElementById("supportList");
     list.innerHTML = "";
-    supportList.forEach((item,idx)=>{
+    // 只显示未处理的反馈
+    let unreadFeedbacks = supportList.filter(x=>!x.read);
+    unreadFeedbacks.forEach((item,idx)=>{
         let div = document.createElement("div");
         div.className = "feedback-card";
         div.innerHTML = `
             <p>用户：${item.user} | 设备：${item.device}</p>
             <p>问题：${item.problem}</p>
-            ${item.reply ? `<p style="color:#22c55e">管理员回复：${item.reply}</p>` : ""}
-            <button class="btn" onclick="markSupportRead(${idx})">标记已读</button>
+            <button class="btn" onclick="markSupportRead(${supportList.indexOf(item)})">标记已读</button>
             <div class="reply-area">
-                <input type="text" id="replyInput_${idx}" placeholder="输入回复内容">
-                <button class="btn btn-purple" onclick="replyToFeedback(${idx})">回复用户</button>
+                <input type="text" id="replyInput_${supportList.indexOf(item)}" placeholder="输入回复内容">
+                <button class="btn btn-purple" onclick="replyToFeedback(${supportList.indexOf(item)})">回复用户</button>
             </div>
         `;
         list.appendChild(div);
@@ -301,14 +360,48 @@ function markSupportRead(idx){
     refreshSupportList();refreshSupportBadge();
     showMsg("已读取反馈");
 }
+// 回复用户后自动标记已读，反馈从列表消失
 function replyToFeedback(idx){
     let replyInput = document.getElementById(`replyInput_${idx}`);
     let replyText = replyInput.value.trim();
     if(!replyText) return showMsg("请输入回复内容","error");
-    supportList[idx].reply = replyText;
+    supportList[idx).reply = replyText;
+    supportList[idx].read = true;
+    supportList[idx].userReadReply = false;
     localStorage.setItem("sysSupport",JSON.stringify(supportList));
     refreshSupportList();
-    showMsg("回复已发送给用户");
+    refreshSupportBadge();
+    showMsg("回复已发送给用户，反馈已自动标记为已读并从列表消失");
+}
+
+// 用户端反馈记录（显示所有反馈，包括已回复）
+function loadUserFeedbackList(){
+    if(!nowUser) return;
+    let list = document.getElementById("userFeedbackList");
+    list.innerHTML = "";
+    let myFeedbacks = supportList.filter(x=>x.user===nowUser.user);
+    myFeedbacks.forEach((item,idx)=>{
+        let div = document.createElement("div");
+        div.className = "feedback-card";
+        div.innerHTML = `
+            <p>提交时间：${item.time}</p>
+            <p>你的问题：${item.problem}</p>
+            ${item.reply ? `
+                <div class="user-reply-box">
+                    <p>管理员回复：${item.reply}</p>
+                    <button class="btn" onclick="markUserReadReply(${supportList.indexOf(item)})">标记已读</button>
+                </div>
+            ` : `<p style="color:#999;">等待管理员回复...</p>`}
+        `;
+        list.appendChild(div);
+    });
+}
+function markUserReadReply(idx){
+    supportList[idx].userReadReply = true;
+    localStorage.setItem("sysSupport",JSON.stringify(supportList));
+    refreshSupportBadge();
+    loadUserFeedbackList();
+    showMsg("回复已标记为已读");
 }
 
 function adminLogin(){
@@ -375,70 +468,4 @@ function giveVip(){
 function giveKey(){
     let target = document.getElementById("keyTargetUser").value.trim();
     let amount = parseInt(document.getElementById("keyAmount").value)||1;
-    let days = parseInt(document.getElementById("keyDays").value)||7;
-    let targetUser = target ? userData.find(x=>x.user===target) : userData[Math.floor(Math.random()*userData.length)];
-    if(!targetUser) return showMsg("目标用户无效","error");
-    for(let i=0;i<amount;i++){
-        let k = genDeltaKey();
-        let exp = new Date();
-        exp.setDate(exp.getDate()+days);
-        keyList.push({code:k,user:targetUser.user,state:"未使用",time:new Date().toLocaleString(),expire:exp.toLocaleString(),days:days});
-    }
-    localStorage.setItem("sysKey",JSON.stringify(keyList));
-    document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg(`已发放${amount}个Delta FREE密钥`);
-}
-function batchCreateKey(){
-    for(let i=0;i<5;i++){
-        let k = genDeltaKey();
-        keyList.push({code:k,user:"admin",state:"未使用",time:new Date().toLocaleString(),expire:"",days:0});
-    }
-    localStorage.setItem("sysKey",JSON.stringify(keyList));
-    document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg("批量生成5个Delta密钥完成");
-}
-function delInvalidKey(){
-    keyList = keyList.filter(x=>new Date(x.expire) > new Date() || !x.expire);
-    localStorage.setItem("sysKey",JSON.stringify(keyList));
-    document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg("过期密钥清理完成");
-}
-
-function runAntiCheat(){
-    let cheat = userData.filter(x=>!x.vip && x.keyCount>2);
-    cheat.forEach(u=>{
-        let i = userData.findIndex(x=>x.user===u.user);
-        userData[i].blacklist = true;
-    });
-    localStorage.setItem("sysUser",JSON.stringify(userData));
-    refreshUserList();
-    showMsg(`检测${cheat.length}名作弊用户，自动拉黑`);
-}
-function systemCheck(){
-    try{
-        localStorage.setItem("sysUser",JSON.stringify(userData));
-        localStorage.setItem("sysAdmin",JSON.stringify(adminData));
-        localStorage.setItem("sysKey",JSON.stringify(keyList));
-        localStorage.setItem("sysSupport",JSON.stringify(supportList));
-        showMsg("系统自检修复完毕");
-    }catch(e){showMsg("异常已自动修复","error");}
-}
-function dataBackup(){showMsg("全部数据本地备份成功");}
-function clearCache(){showMsg("缓存清理完成");}
-function saveNotice(){
-    let nt = document.getElementById("siteNotice").value.trim();
-    localStorage.setItem("sysNotice",nt);
-    siteNotice = nt;
-    document.getElementById("noticeText").innerText = nt;
-    showMsg("公告保存生效");
-}
-
-window.onload = function(){
-    refreshUserList();
-    refreshSupportBadge();
-    refreshSupportList();
-    document.getElementById("noticeText").innerText = siteNotice;
-}
-</script>
-</body>
-</html>
+    let days = parseInt(documen
