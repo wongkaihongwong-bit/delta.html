@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>一体化运营系统+后台管理</title>
+<title>Roblox 一体化运营系统 | 防作弊+会员+后台+聊天+客服</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 body{background:#12151c;color:#eee;min-height:100vh;}
 .container{max-width:1200px;margin:0 auto;padding:20px;}
-.nav{display:flex;gap:15px;margin-bottom:20px;padding:15px;background:#1e222b;border-radius:8px;}
+.nav{display:flex;gap:15px;margin-bottom:20px;padding:15px;background:#1e222b;border-radius:8px;flex-wrap:wrap;}
 .nav button{padding:8px 18px;border:none;border-radius:5px;background:#2563eb;color:#fff;cursor:pointer;}
 .nav button:hover{background:#1d4ed8;}
 .box{background:#1e222b;padding:25px;border-radius:10px;margin-bottom:20px;display:none;}
 .active{display:block;}
-input,select{width:100%;padding:10px;margin:8px 0;border-radius:4px;border:none;background:#2a2f3b;color:#fff;}
+input,select,textarea{width:100%;padding:10px;margin:8px 0;border-radius:4px;border:none;background:#2a2f3b;color:#fff;}
 .btn{padding:10px 20px;background:#22c55e;border:none;border-radius:5px;color:#fff;cursor:pointer;margin:5px 0;}
 .btn-danger{background:#ef4444;}
 .btn-warning{background:#f59e0b;}
+.btn-admin{background:#7c3aed;}
 table{width:100%;border-collapse:collapse;margin:10px 0;}
 th,td{border:1px solid #333;padding:10px;text-align:center;}
 th{background:#2a2f3b;}
@@ -24,18 +25,25 @@ th{background:#2a2f3b;}
 .success{background:#164e32;}
 .error{background:#6b1b1b;}
 .hide{display:none;}
+.envelope-badge{background:#ef4444;color:#fff;border-radius:50%;padding:2px 6px;font-size:12px;}
+.chat-box{height:250px;overflow-y:auto;background:#2a2f3b;padding:10px;border-radius:5px;margin:10px 0;}
+.chat-msg{margin:5px 0;}
+.my-msg{color:#22c55e;}
+.other-msg{color:#f59e0b;}
 </style>
 </head>
 <body>
 <div class="container">
-    <h2 style="margin:15px 0;">全能稳定运营系统</h2>
+    <h2 style="margin:15px 0;">一体化运营系统</h2>
     <div class="nav">
         <button onclick="switchTab('home')">首页</button>
         <button onclick="switchTab('login')">账号登录</button>
         <button onclick="switchTab('register')">账号注册</button>
         <button onclick="switchTab('keygen')">密钥生成</button>
         <button onclick="switchTab('vip')">会员中心</button>
-        <button onclick="switchTab('admin')">后台管理</button>
+        <button onclick="switchTab('chat')">聊天群聊</button>
+        <button onclick="switchTab('support')">客服反馈</button>
+        <button onclick="switchTab('admin')">后台管理 <span id="envelopeBadge" class="envelope-badge hide">0</span></button>
     </div>
 
     <!-- 提示弹窗 -->
@@ -44,14 +52,15 @@ th{background:#2a2f3b;}
     <!-- 首页 -->
     <div id="home" class="box active">
         <h3>系统主页</h3>
-        <p style="margin:10px 0;">稳定无报错一体化系统，包含用户、密钥、会员、后台全套功能</p>
+        <p style="margin:10px 0;">稳定无报错一体化系统，包含用户、密钥、会员、聊天、客服、后台全套功能</p>
         <p>当前在线用户：<span id="onlineNum">0</span></p>
+        <p>系统公告：<span id="noticeText"></span></p>
     </div>
 
     <!-- 登录 -->
     <div id="login" class="box">
         <h3>用户登录</h3>
-        <input type="text" id="loginUser" placeholder="输入账号">
+        <input type="text" id="loginUser" placeholder="输入注册邮箱（账号）">
         <input type="password" id="loginPwd" placeholder="输入密码">
         <button class="btn" onclick="userLogin()">立即登录</button>
     </div>
@@ -59,8 +68,10 @@ th{background:#2a2f3b;}
     <!-- 注册 -->
     <div id="register" class="box">
         <h3>新用户注册</h3>
-        <input type="text" id="regUser" placeholder="设置账号">
+        <input type="email" id="regUser" placeholder="设置专用邮箱（xxx@gmail.com）">
         <input type="password" id="regPwd" placeholder="设置密码">
+        <input type="text" id="regName" placeholder="输入昵称">
+        <input type="date" id="regBirthday" placeholder="出生日期">
         <button class="btn" onclick="userRegister()">提交注册</button>
     </div>
 
@@ -74,66 +85,131 @@ th{background:#2a2f3b;}
         </select>
         <button class="btn" onclick="createKey()">生成密钥</button>
         <p style="margin-top:10px;">生成结果：<span id="keyResult"></span></p>
+        <p>当前剩余可生成次数：<span id="keyLeft">0</span></p>
     </div>
 
     <!-- 会员中心 -->
     <div id="vip" class="box">
         <h3>会员套餐</h3>
-        <p>月度会员：10 费用</p>
-        <p>年度会员：优惠套餐</p>
-        <button class="btn btn-warning" onclick="vipBuy()">开通会员</button>
+        <p>月度会员：RM10，每月2次密钥，可叠加，有效期2个月</p>
+        <p>年度会员：RM120，可创建2个账号，每月2次密钥，可叠加，有效期2个月</p>
+        <p>普通用户：7天内没用完次数自动重置，不可叠加</p>
+        <button class="btn btn-warning" onclick="vipBuy()">开通会员（联系管理员开通）</button>
         <p style="margin-top:10px;">会员状态：<span id="vipStatus">普通用户</span></p>
+        <p>会员到期时间：<span id="vipExpire">无</span></p>
+    </div>
+
+    <!-- 聊天群聊 -->
+    <div id="chat" class="box">
+        <h3>聊天系统</h3>
+        <p>官方大群（全员可见，无法退出）</p>
+        <div class="chat-box" id="mainChat"></div>
+        <input type="text" id="chatInput" placeholder="发送消息" style="width:80%;display:inline-block;">
+        <button class="btn" onclick="sendChat()" style="width:18%;display:inline-block;">发送</button>
+        <hr style="margin:15px 0;">
+        <p>好友列表与群聊（可创建/加入群聊）</p>
+        <button class="btn" onclick="createGroup()">创建群聊</button>
+    </div>
+
+    <!-- 客服反馈（Roblox风格） -->
+    <div id="support" class="box">
+        <h3>客服反馈</h3>
+        <input type="text" id="supportUser" placeholder="用户名（注册邮箱）">
+        <input type="text" id="supportName" placeholder="名字（邮箱）">
+        <select id="supportDevice">
+            <option value="">选择设备类型</option>
+            <option value="Android手机">Android 手机</option>
+            <option value="Android平板">Android 平板电脑</option>
+            <option value="Amazon设备">Amazon 设备</option>
+            <option value="Xbox">Xbox</option>
+            <option value="PlayStation">PlayStation</option>
+            <option value="MetaQuest">Meta Quest</option>
+        </select>
+        <textarea id="supportProblem" placeholder="请描述你的问题。请附上任何相关信息，例如问题发生的位置或截图描述"></textarea>
+        <button class="btn btn-admin" onclick="submitSupport()">提交反馈</button>
     </div>
 
     <!-- 完整后台管理面板 -->
     <div id="admin" class="box">
         <h3>超级后台管理系统</h3>
         <p style="color:#f59e0b;margin:8px 0;">仅管理员可操作，自带防错校验</p>
+        <input type="text" id="adminLoginUser" placeholder="管理员账号（固定0189597579）">
+        <input type="password" id="adminLoginPwd" placeholder="管理员密码（0102030405060708090）">
+        <button class="btn btn-admin" onclick="adminLogin()">进入后台</button>
+        <hr style="margin:15px 0;">
+        <div id="adminPanel" class="hide">
+            <h4 style="margin:15px 0 8px;">1.管理员账号管理（可无限创建）</h4>
+            <input type="text" id="addAdminUser" placeholder="新增管理员账号">
+            <input type="password" id="addAdminPwd" placeholder="管理员密码">
+            <button class="btn" onclick="addAdmin()">添加管理员</button>
+            <button class="btn btn-danger" onclick="clearAdmin()">重置管理员</button>
 
-        <h4 style="margin:15px 0 8px;">1.管理员账号管理</h4>
-        <input type="text" id="addAdminUser" placeholder="新增管理员账号">
-        <input type="password" id="addAdminPwd" placeholder="管理员密码">
-        <button class="btn" onclick="addAdmin()">添加管理员</button>
-        <button class="btn btn-danger" onclick="clearAdmin()">清空管理员</button>
+            <h4 style="margin:15px 0 8px;">2.用户管理（含黑名单/解除黑名单）</h4>
+            <table>
+                <thead>
+                    <tr><th>账号</th><th>昵称</th><th>会员</th><th>黑名单</th><th>操作</th></tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+            <button class="btn" onclick="refreshUserList()">刷新用户列表</button>
 
-        <h4 style="margin:15px 0 8px;">2.全部用户管理</h4>
-        <table>
-            <thead>
-                <tr><th>账号</th><th>会员</th><th>操作</th></tr>
-            </thead>
-            <tbody id="userTable"></tbody>
-        </table>
-        <button class="btn" onclick="refreshUserList">刷新用户列表</button>
+            <h4 style="margin:15px 0 8px;">3.会员管理（手动开通/叠加）</h4>
+            <input type="text" id="vipUserEdit" placeholder="用户账号">
+            <select id="vipTypeEdit">
+                <option value="month">月度会员（RM10）</option>
+                <option value="year">年度会员（RM120）</option>
+            </select>
+            <button class="btn btn-warning" onclick="giveVip()">给予会员</button>
 
-        <h4 style="margin:15px 0 8px;">3.密钥数据管理</h4>
-        <p>已生成密钥总数：<span id="keyTotal">0</span></p>
-        <button class="btn btn-warning" onclick="batchCreateKey()">批量生成密钥</button>
-        <button class="btn btn-danger" onclick="delInvalidKey()">作废失效密钥</button>
+            <h4 style="margin:15px 0 8px;">4.密钥管理（指定/随机发放+自定义有效期）</h4>
+            <input type="text" id="keyTargetUser" placeholder="指定用户账号（留空为随机）">
+            <input type="number" id="keyAmount" placeholder="密钥数量">
+            <input type="number" id="keyDays" placeholder="有效期（天）">
+            <button class="btn btn-admin" onclick="giveKey()">发放密钥</button>
+            <button class="btn btn-warning" onclick="batchCreateKey()">批量生成密钥</button>
+            <button class="btn btn-danger" onclick="delInvalidKey()">作废失效密钥</button>
+            <p>已生成密钥总数：<span id="keyTotal">0</span></p>
 
-        <h4 style="margin:15px 0 8px;">4.安全防护与系统维护</h4>
-        <button class="btn" onclick="systemCheck()">系统自检防错</button>
-        <button class="btn btn-warning" onclick="dataBackup()">数据一键备份</button>
-        <button class="btn btn-danger" onclick="clearCache()">清理系统缓存</button>
+            <h4 style="margin:15px 0 8px;">5.客服反馈管理（信封系统）</h4>
+            <div id="supportList"></div>
+            <button class="btn" onclick="refreshSupportList()">刷新反馈</button>
 
-        <h4 style="margin:15px 0 8px;">5.站点公告配置</h4>
-        <input type="text" id="siteNotice" placeholder="输入网站公告内容">
-        <button class="btn" onclick="saveNotice()">保存公告</button>
+            <h4 style="margin:15px 0 8px;">6.群聊奖励设置（自动排名发密钥）</h4>
+            <button class="btn btn-admin" onclick="runGroupReward()">执行群聊奖励发放</button>
+
+            <h4 style="margin:15px 0 8px;">7.系统维护与防作弊</h4>
+            <button class="btn" onclick="systemCheck()">系统自检防错</button>
+            <button class="btn btn-warning" onclick="dataBackup()">数据一键备份</button>
+            <button class="btn btn-danger" onclick="clearCache()">清理系统缓存</button>
+            <button class="btn btn-admin" onclick="runAntiCheat()">防作弊扫描（检测超额密钥用户）</button>
+
+            <h4 style="margin:15px 0 8px;">8.站点公告配置</h4>
+            <input type="text" id="siteNotice" placeholder="输入网站公告内容">
+            <button class="btn" onclick="saveNotice()">保存公告</button>
+        </div>
     </div>
 </div>
 
 <script>
 // 全局数据存储 防丢失防报错
 let userData = JSON.parse(localStorage.getItem("sysUser")) || [];
-let adminData = JSON.parse(localStorage.getItem("sysAdmin")) || [{user:"admin",pwd:"123456"}];
+let adminData = JSON.parse(localStorage.getItem("sysAdmin")) || [{user:"0189597579",pwd:"0102030405060708090"}];
 let keyList = JSON.parse(localStorage.getItem("sysKey")) || [];
 let siteNotice = localStorage.getItem("sysNotice") || "欢迎使用稳定运营系统";
+let supportList = JSON.parse(localStorage.getItem("sysSupport")) || [];
+let chatMessages = JSON.parse(localStorage.getItem("sysChat")) || [];
 let nowUser = null;
+let isAdmin = false;
 
 // 标签切换
 function switchTab(id){
     document.querySelectorAll(".box").forEach(el=>el.classList.remove("active"));
     document.getElementById(id).classList.add("active");
     hideMsg();
+    if(id==='admin' && !isAdmin) document.getElementById("adminPanel").classList.add("hide");
+    if(id==='home') document.getElementById("noticeText").innerText = siteNotice;
+    if(id==='chat') loadChatMessages();
+    if(id==='support') refreshSupportBadge();
 }
 
 // 提示消息
@@ -148,57 +224,152 @@ function hideMsg(){
     document.getElementById("msgBox").style.display = "none";
 }
 
-// 用户注册
+// 用户注册（含头像、出生日期、防13岁黑名单）
 function userRegister(){
     let u = document.getElementById("regUser").value.trim();
     let p = document.getElementById("regPwd").value.trim();
-    if(!u||!p) return showMsg("账号密码不能为空","error");
+    let n = document.getElementById("regName").value.trim();
+    let b = document.getElementById("regBirthday").value;
+    if(!u||!p||!b) return showMsg("所有信息不能为空","error");
+    let birth = new Date(b);
+    let age = new Date().getFullYear() - birth.getFullYear();
+    if(age < 13) return showMsg("未满13岁禁止注册，自动加入黑名单","error");
     let exist = userData.find(x=>x.user===u);
     if(exist) return showMsg("账号已存在","error");
-    userData.push({user:u,pwd:p,vip:false,time:new Date().toLocaleString()});
+    let randomId = Math.random().toString(36).substr(2, 3).toUpperCase() + " " + Math.random().toString(36).substr(2, 3).toUpperCase() + " " + Math.random().toString(36).substr(2, 3).toUpperCase();
+    let randomAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${u}`;
+    userData.push({
+        user:u,pwd:p,name:n,birthday:b,id:randomId,avatar:randomAvatar,
+        vip:false,vipType:"none",vipExpire:"",keyCount:0,keyMax:0,blacklist:false,
+        registerTime:new Date().toLocaleString()
+    });
     localStorage.setItem("sysUser",JSON.stringify(userData));
-    showMsg("注册成功！");
+    showMsg("注册成功！自动生成头像与ID");
 }
 
 // 用户登录
 function userLogin(){
     let u = document.getElementById("loginUser").value.trim();
     let p = document.getElementById("loginPwd").value.trim();
-    let find = userData.find(x=>x.user===u&&x.pwd===p);
-    if(!find) return showMsg("账号密码错误","error");
+    let find = userData.find(x=>x.user===u&&x.pwd===p&&!x.blacklist);
+    if(!find) return showMsg("账号密码错误或已被封禁","error");
     nowUser = find;
-    document.getElementById("vipStatus").innerText = find.vip?"会员用户":"普通用户";
+    document.getElementById("vipStatus").innerText = find.vip ? (find.vipType==="year"?"年度会员":"月度会员") : "普通用户";
+    document.getElementById("vipExpire").innerText = find.vipExpire || "无";
+    document.getElementById("keyLeft").innerText = find.keyMax - find.keyCount;
     showMsg("登录成功");
 }
 
-// 生成密钥
+// 生成密钥（会员次数控制）
 function createKey(){
+    if(!nowUser) return showMsg("请先登录账号","error");
+    if(nowUser.keyCount >= nowUser.keyMax) return showMsg("密钥次数已用完","error");
     let len = document.getElementById("keyLen").value;
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
     let key = "";
-    for(let i=0;i<len;i++){
-        key += chars[Math.floor(Math.random()*chars.length)];
-    }
-    keyList.push({code:key,state:"未使用",time:new Date().toLocaleString()});
+    for(let i=0;i<len;i++) key += chars[Math.floor(Math.random()*chars.length)];
+    let expire = new Date();
+    expire.setDate(expire.getDate() + 60); // 默认2个月有效期
+    keyList.push({code:key,user:nowUser.user,state:"未使用",time:new Date().toLocaleString(),expire:expire.toLocaleString(),days:60});
+    nowUser.keyCount++;
+    let idx = userData.findIndex(x=>x.user===nowUser.user);
+    userData[idx].keyCount = nowUser.keyCount;
+    localStorage.setItem("sysUser",JSON.stringify(userData));
     localStorage.setItem("sysKey",JSON.stringify(keyList));
     document.getElementById("keyResult").innerText = key;
     document.getElementById("keyTotal").innerText = keyList.length;
+    document.getElementById("keyLeft").innerText = nowUser.keyMax - nowUser.keyCount;
     showMsg("密钥生成成功");
 }
 
-// 开通会员
+// 开通会员（管理员手动开通）
 function vipBuy(){
-    if(!nowUser) return showMsg("请先登录账号","error");
-    let idx = userData.findIndex(x=>x.user===nowUser.user);
-    userData[idx].vip = true;
-    localStorage.setItem("sysUser",JSON.stringify(userData));
-    nowUser.vip = true;
-    document.getElementById("vipStatus").innerText = "会员用户";
-    showMsg("会员开通成功");
+    showMsg("请联系管理员手动开通会员","error");
 }
 
-// ========== 后台全套功能 ==========
-// 添加管理员
+// ========== 聊天系统 ==========
+function sendChat(){
+    if(!nowUser) return showMsg("请先登录账号","error");
+    let text = document.getElementById("chatInput").value.trim();
+    if(!text) return;
+    chatMessages.push({user:nowUser.name||nowUser.user,text:text,time:new Date().toLocaleString()});
+    localStorage.setItem("sysChat",JSON.stringify(chatMessages));
+    document.getElementById("chatInput").value = "";
+    loadChatMessages();
+}
+function loadChatMessages(){
+    let box = document.getElementById("mainChat");
+    box.innerHTML = "";
+    chatMessages.forEach(msg=>{
+        let div = document.createElement("div");
+        div.className = msg.user === nowUser?.name || msg.user === nowUser?.user ? "chat-msg my-msg" : "chat-msg other-msg";
+        div.innerText = `[${msg.time}] ${msg.user}: ${msg.text}`;
+        box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+}
+function createGroup(){
+    showMsg("群聊创建功能（管理员可设置群聊排名奖励）");
+}
+
+// ========== 客服反馈系统（Roblox风格） ==========
+function submitSupport(){
+    let user = document.getElementById("supportUser").value.trim();
+    let name = document.getElementById("supportName").value.trim();
+    let device = document.getElementById("supportDevice").value;
+    let problem = document.getElementById("supportProblem").value.trim();
+    if(!user||!problem) return showMsg("用户名和问题不能为空","error");
+    supportList.push({user:user,name:name,device:device,problem:problem,time:new Date().toLocaleString(),read:false});
+    localStorage.setItem("sysSupport",JSON.stringify(supportList));
+    refreshSupportBadge();
+    showMsg("反馈提交成功，管理员会尽快回复");
+}
+function refreshSupportBadge(){
+    let unread = supportList.filter(x=>!x.read).length;
+    let badge = document.getElementById("envelopeBadge");
+    if(unread>0){
+        badge.innerText = unread;
+        badge.classList.remove("hide");
+    } else badge.classList.add("hide");
+}
+function refreshSupportList(){
+    let list = document.getElementById("supportList");
+    list.innerHTML = "";
+    supportList.forEach((item,idx)=>{
+        let div = document.createElement("div");
+        div.style.padding="10px";
+        div.style.background="#2a2f3b";
+        div.style.margin="5px 0";
+        div.innerHTML = `
+            <p>用户：${item.user} | 设备：${item.device}</p>
+            <p>问题：${item.problem}</p>
+            <button class="btn" onclick="markSupportRead(${idx})">标记已读</button>
+        `;
+        list.appendChild(div);
+    });
+}
+function markSupportRead(idx){
+    supportList[idx].read = true;
+    localStorage.setItem("sysSupport",JSON.stringify(supportList));
+    refreshSupportList();
+    refreshSupportBadge();
+    showMsg("已读反馈");
+}
+
+// ========== 后台管理系统 ==========
+function adminLogin(){
+    let u = document.getElementById("adminLoginUser").value.trim();
+    let p = document.getElementById("adminLoginPwd").value.trim();
+    let find = adminData.find(x=>x.user===u&&x.pwd===p);
+    if(!find) return showMsg("管理员账号密码错误","error");
+    isAdmin = true;
+    document.getElementById("adminPanel").classList.remove("hide");
+    showMsg("管理员登录成功");
+    refreshUserList();
+    refreshSupportList();
+}
+
+// 添加管理员（可无限创建）
 function addAdmin(){
     let u = document.getElementById("addAdminUser").value.trim();
     let p = document.getElementById("addAdminPwd").value.trim();
@@ -207,14 +378,13 @@ function addAdmin(){
     localStorage.setItem("sysAdmin",JSON.stringify(adminData));
     showMsg("管理员添加成功");
 }
-// 清空管理员
 function clearAdmin(){
-    adminData = [{user:"admin",pwd:"123456"}];
+    adminData = [{user:"0189597579",pwd:"0102030405060708090"}];
     localStorage.setItem("sysAdmin",JSON.stringify(adminData));
     showMsg("管理员重置完成");
 }
 
-// 刷新用户列表
+// 刷新用户列表（含黑名单）
 function refreshUserList(){
     let tb = document.getElementById("userTable");
     tb.innerHTML = "";
@@ -222,22 +392,71 @@ function refreshUserList(){
         let tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${item.user}</td>
-            <td>${item.vip?"是":"否"}</td>
-            <td><button class="btn btn-danger" onclick="banUser('${item.user}')">封禁</button></td>
+            <td>${item.name}</td>
+            <td>${item.vip ? (item.vipType==="year"?"年度":"月度"):"普通"}</td>
+            <td>${item.blacklist?"是":"否"}</td>
+            <td>
+                <button class="btn btn-danger" onclick="toggleBlacklist('${item.user}')">${item.blacklist?"解除":"加入"}黑名单</button>
+            </td>
         `;
         tb.appendChild(tr);
     });
-    document.getElementById("onlineNum").innerText = userData.length;
+    document.getElementById("onlineNum").innerText = userData.filter(x=>!x.blacklist).length;
     document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg("列表刷新完成");
 }
 
-// 封禁用户
-function banUser(name){
-    userData = userData.filter(x=>x.user!==name);
+// 黑名单/解除黑名单
+function toggleBlacklist(name){
+    let idx = userData.findIndex(x=>x.user===name);
+    if(idx===-1) return showMsg("用户不存在","error");
+    userData[idx].blacklist = !userData[idx].blacklist;
     localStorage.setItem("sysUser",JSON.stringify(userData));
     refreshUserList();
-    showMsg("用户已封禁");
+    showMsg(userData[idx].blacklist?"用户已加入黑名单":"用户已解除黑名单");
+}
+
+// 管理员给予会员（月度/年度，可叠加）
+function giveVip(){
+    let u = document.getElementById("vipUserEdit").value.trim();
+    let type = document.getElementById("vipTypeEdit").value;
+    let idx = userData.findIndex(x=>x.user===u);
+    if(idx===-1) return showMsg("用户不存在","error");
+    let expire = new Date();
+    let keyMaxAdd = 2;
+    if(type==="month"){
+        expire.setMonth(expire.getMonth() + 1);
+        keyMaxAdd = 2;
+    } else if(type==="year"){
+        expire.setFullYear(expire.getFullYear() + 1);
+        keyMaxAdd = 2;
+    }
+    userData[idx].vip = true;
+    userData[idx].vipType = type;
+    userData[idx].vipExpire = expire.toLocaleString();
+    userData[idx].keyMax += keyMaxAdd; // 可叠加次数
+    localStorage.setItem("sysUser",JSON.stringify(userData));
+    refreshUserList();
+    showMsg(`已为用户${u}开通${type==="year"?"年度":"月度"}会员，密钥次数+${keyMaxAdd}`);
+}
+
+// 管理员发放密钥（指定/随机，自定义有效期）
+function giveKey(){
+    let target = document.getElementById("keyTargetUser").value.trim();
+    let amount = parseInt(document.getElementById("keyAmount").value) || 1;
+    let days = parseInt(document.getElementById("keyDays").value) || 7;
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let targetUser = target ? userData.find(x=>x.user===target) : userData[Math.floor(Math.random()*userData.length)];
+    if(!targetUser) return showMsg("目标用户不存在","error");
+    for(let i=0;i<amount;i++){
+        let k="";
+        for(let j=0;j<16;j++) k+=chars[Math.floor(Math.random()*chars.length)];
+        let expire = new Date();
+        expire.setDate(expire.getDate() + days);
+        keyList.push({code:k,user:targetUser.user,state:"未使用",time:new Date().toLocaleString(),expire:expire.toLocaleString(),days:days});
+    }
+    localStorage.setItem("sysKey",JSON.stringify(keyList));
+    document.getElementById("keyTotal").innerText = keyList.length;
+    showMsg(`已为用户${targetUser.user}发放${amount}个密钥，有效期${days}天`);
 }
 
 // 批量生成密钥
@@ -246,57 +465,6 @@ function batchCreateKey(){
     for(let a=0;a<5;a++){
         let k="";
         for(let i=0;i<16;i++)k+=chars[Math.floor(Math.random()*chars.length)];
-        keyList.push({code:k,state:"未使用",time:new Date().toLocaleString()});
+        keyList.push({code:k,user:"admin",state:"未使用",time:new Date().toLocaleString(),expire:"",days:0});
     }
-    localStorage.setItem("sysKey",JSON.stringify(keyList));
-    document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg("批量5个密钥生成完毕");
-}
-
-// 作废失效密钥
-function delInvalidKey(){
-    keyList = keyList.filter(x=>x.state=="未使用");
-    localStorage.setItem("sysKey",JSON.stringify(keyList));
-    document.getElementById("keyTotal").innerText = keyList.length;
-    showMsg("无效密钥清理完成");
-}
-
-// 系统自检防错
-function systemCheck(){
-    try{
-        userData = userData||[];
-        adminData = adminData||[];
-        keyList = keyList||[];
-        localStorage.setItem("sysUser",JSON.stringify(userData));
-        localStorage.setItem("sysAdmin",JSON.stringify(adminData));
-        localStorage.setItem("sysKey",JSON.stringify(keyList));
-        showMsg("系统自检完成，无错误");
-    }catch(e){
-        showMsg("检测到异常已自动修复","error");
-    }
-}
-
-// 数据备份
-function dataBackup(){
-    showMsg("全部数据已本地双重备份");
-}
-
-// 清理缓存
-function clearCache(){
-    showMsg("缓存清理完毕，运行更稳定");
-}
-
-// 保存公告
-function saveNotice(){
-    let nt = document.getElementById("siteNotice").value.trim();
-    localStorage.setItem("sysNotice",nt);
-    showMsg("公告保存成功");
-}
-
-// 页面加载初始化
-window.onload = function(){
-    refreshUserList();
-}
-</script>
-</body>
-</html>
+    localStorage.setItem("sysKey
