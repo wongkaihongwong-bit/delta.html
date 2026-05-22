@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox 一体化运营系统 | 防作弊+会员+后台+聊天+客服</title>
+<title>Delta 一体化运营系统</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 body{background:#12151c;color:#eee;min-height:100vh;}
@@ -34,7 +34,7 @@ th{background:#2a2f3b;}
 </head>
 <body>
 <div class="container">
-    <h2 style="margin:15px 0;">一体化运营系统</h2>
+    <h2 style="margin:15px 0;">Delta 一体化运营系统</h2>
     <div class="nav">
         <button onclick="switchTab('home')">首页</button>
         <button onclick="switchTab('login')">账号登录</button>
@@ -46,10 +46,8 @@ th{background:#2a2f3b;}
         <button onclick="switchTab('admin')">后台管理 <span id="envelopeBadge" class="envelope-badge hide">0</span></button>
     </div>
 
-    <!-- 提示弹窗 -->
     <div id="msgBox" class="alert"></div>
 
-    <!-- 首页 -->
     <div id="home" class="box active">
         <h3>系统主页</h3>
         <p style="margin:10px 0;">稳定无报错一体化系统，包含用户、密钥、会员、聊天、客服、后台全套功能</p>
@@ -57,7 +55,6 @@ th{background:#2a2f3b;}
         <p>系统公告：<span id="noticeText"></span></p>
     </div>
 
-    <!-- 登录 -->
     <div id="login" class="box">
         <h3>用户登录</h3>
         <input type="text" id="loginUser" placeholder="输入注册邮箱（账号）">
@@ -65,7 +62,6 @@ th{background:#2a2f3b;}
         <button class="btn" onclick="userLogin()">立即登录</button>
     </div>
 
-    <!-- 注册 -->
     <div id="register" class="box">
         <h3>新用户注册</h3>
         <input type="email" id="regUser" placeholder="设置专用邮箱（xxx@gmail.com）">
@@ -75,7 +71,6 @@ th{background:#2a2f3b;}
         <button class="btn" onclick="userRegister()">提交注册</button>
     </div>
 
-    <!-- 密钥生成 -->
     <div id="keygen" class="box">
         <h3>密钥生成工具</h3>
         <select id="keyLen">
@@ -88,7 +83,6 @@ th{background:#2a2f3b;}
         <p>当前剩余可生成次数：<span id="keyLeft">0</span></p>
     </div>
 
-    <!-- 会员中心 -->
     <div id="vip" class="box">
         <h3>会员套餐</h3>
         <p>月度会员：RM10，每月2次密钥，可叠加，有效期2个月</p>
@@ -99,7 +93,6 @@ th{background:#2a2f3b;}
         <p>会员到期时间：<span id="vipExpire">无</span></p>
     </div>
 
-    <!-- 聊天群聊 -->
     <div id="chat" class="box">
         <h3>聊天系统</h3>
         <p>官方大群（全员可见，无法退出）</p>
@@ -111,7 +104,6 @@ th{background:#2a2f3b;}
         <button class="btn" onclick="createGroup()">创建群聊</button>
     </div>
 
-    <!-- 客服反馈（Roblox风格） -->
     <div id="support" class="box">
         <h3>客服反馈</h3>
         <input type="text" id="supportUser" placeholder="用户名（注册邮箱）">
@@ -129,7 +121,6 @@ th{background:#2a2f3b;}
         <button class="btn btn-admin" onclick="submitSupport()">提交反馈</button>
     </div>
 
-    <!-- 完整后台管理面板 -->
     <div id="admin" class="box">
         <h3>超级后台管理系统</h3>
         <p style="color:#f59e0b;margin:8px 0;">仅管理员可操作，自带防错校验</p>
@@ -191,7 +182,6 @@ th{background:#2a2f3b;}
 </div>
 
 <script>
-// 全局数据存储 防丢失防报错
 let userData = JSON.parse(localStorage.getItem("sysUser")) || [];
 let adminData = JSON.parse(localStorage.getItem("sysAdmin")) || [{user:"0189597579",pwd:"0102030405060708090"}];
 let keyList = JSON.parse(localStorage.getItem("sysKey")) || [];
@@ -201,7 +191,6 @@ let chatMessages = JSON.parse(localStorage.getItem("sysChat")) || [];
 let nowUser = null;
 let isAdmin = false;
 
-// 标签切换
 function switchTab(id){
     document.querySelectorAll(".box").forEach(el=>el.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -212,7 +201,6 @@ function switchTab(id){
     if(id==='support') refreshSupportBadge();
 }
 
-// 提示消息
 function showMsg(text,type="success"){
     let box = document.getElementById("msgBox");
     box.innerText = text;
@@ -224,7 +212,6 @@ function hideMsg(){
     document.getElementById("msgBox").style.display = "none";
 }
 
-// 用户注册（含头像、出生日期、防13岁黑名单）
 function userRegister(){
     let u = document.getElementById("regUser").value.trim();
     let p = document.getElementById("regPwd").value.trim();
@@ -247,7 +234,6 @@ function userRegister(){
     showMsg("注册成功！自动生成头像与ID");
 }
 
-// 用户登录
 function userLogin(){
     let u = document.getElementById("loginUser").value.trim();
     let p = document.getElementById("loginPwd").value.trim();
@@ -260,7 +246,6 @@ function userLogin(){
     showMsg("登录成功");
 }
 
-// 生成密钥（会员次数控制）
 function createKey(){
     if(!nowUser) return showMsg("请先登录账号","error");
     if(nowUser.keyCount >= nowUser.keyMax) return showMsg("密钥次数已用完","error");
@@ -269,7 +254,7 @@ function createKey(){
     let key = "";
     for(let i=0;i<len;i++) key += chars[Math.floor(Math.random()*chars.length)];
     let expire = new Date();
-    expire.setDate(expire.getDate() + 60); // 默认2个月有效期
+    expire.setDate(expire.getDate() + 60);
     keyList.push({code:key,user:nowUser.user,state:"未使用",time:new Date().toLocaleString(),expire:expire.toLocaleString(),days:60});
     nowUser.keyCount++;
     let idx = userData.findIndex(x=>x.user===nowUser.user);
@@ -282,12 +267,10 @@ function createKey(){
     showMsg("密钥生成成功");
 }
 
-// 开通会员（管理员手动开通）
 function vipBuy(){
     showMsg("请联系管理员手动开通会员","error");
 }
 
-// ========== 聊天系统 ==========
 function sendChat(){
     if(!nowUser) return showMsg("请先登录账号","error");
     let text = document.getElementById("chatInput").value.trim();
@@ -312,7 +295,6 @@ function createGroup(){
     showMsg("群聊创建功能（管理员可设置群聊排名奖励）");
 }
 
-// ========== 客服反馈系统（Roblox风格） ==========
 function submitSupport(){
     let user = document.getElementById("supportUser").value.trim();
     let name = document.getElementById("supportName").value.trim();
@@ -356,7 +338,6 @@ function markSupportRead(idx){
     showMsg("已读反馈");
 }
 
-// ========== 后台管理系统 ==========
 function adminLogin(){
     let u = document.getElementById("adminLoginUser").value.trim();
     let p = document.getElementById("adminLoginPwd").value.trim();
@@ -369,7 +350,6 @@ function adminLogin(){
     refreshSupportList();
 }
 
-// 添加管理员（可无限创建）
 function addAdmin(){
     let u = document.getElementById("addAdminUser").value.trim();
     let p = document.getElementById("addAdminPwd").value.trim();
@@ -384,7 +364,6 @@ function clearAdmin(){
     showMsg("管理员重置完成");
 }
 
-// 刷新用户列表（含黑名单）
 function refreshUserList(){
     let tb = document.getElementById("userTable");
     tb.innerHTML = "";
@@ -405,7 +384,6 @@ function refreshUserList(){
     document.getElementById("keyTotal").innerText = keyList.length;
 }
 
-// 黑名单/解除黑名单
 function toggleBlacklist(name){
     let idx = userData.findIndex(x=>x.user===name);
     if(idx===-1) return showMsg("用户不存在","error");
@@ -415,7 +393,6 @@ function toggleBlacklist(name){
     showMsg(userData[idx].blacklist?"用户已加入黑名单":"用户已解除黑名单");
 }
 
-// 管理员给予会员（月度/年度，可叠加）
 function giveVip(){
     let u = document.getElementById("vipUserEdit").value.trim();
     let type = document.getElementById("vipTypeEdit").value;
@@ -433,13 +410,12 @@ function giveVip(){
     userData[idx].vip = true;
     userData[idx].vipType = type;
     userData[idx].vipExpire = expire.toLocaleString();
-    userData[idx].keyMax += keyMaxAdd; // 可叠加次数
+    userData[idx].keyMax += keyMaxAdd;
     localStorage.setItem("sysUser",JSON.stringify(userData));
     refreshUserList();
     showMsg(`已为用户${u}开通${type==="year"?"年度":"月度"}会员，密钥次数+${keyMaxAdd}`);
 }
 
-// 管理员发放密钥（指定/随机，自定义有效期）
 function giveKey(){
     let target = document.getElementById("keyTargetUser").value.trim();
     let amount = parseInt(document.getElementById("keyAmount").value) || 1;
@@ -459,7 +435,6 @@ function giveKey(){
     showMsg(`已为用户${targetUser.user}发放${amount}个密钥，有效期${days}天`);
 }
 
-// 批量生成密钥
 function batchCreateKey(){
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     for(let a=0;a<5;a++){
@@ -467,4 +442,21 @@ function batchCreateKey(){
         for(let i=0;i<16;i++)k+=chars[Math.floor(Math.random()*chars.length)];
         keyList.push({code:k,user:"admin",state:"未使用",time:new Date().toLocaleString(),expire:"",days:0});
     }
-    localStorage.setItem("sysKey
+    localStorage.setItem("sysKey",JSON.stringify(keyList));
+    document.getElementById("keyTotal").innerText = keyList.length;
+    showMsg("批量5个密钥生成完毕");
+}
+
+function delInvalidKey(){
+    keyList = keyList.filter(x=>new Date(x.expire) > new Date() || !x.expire);
+    localStorage.setItem("sysKey",JSON.stringify(keyList));
+    document.getElementById("keyTotal").innerText = keyList.length;
+    showMsg("无效密钥清理完成");
+}
+
+function runGroupReward(){
+    showMsg("群聊奖励已执行：根据群聊人数发放密钥（第一名5个，第二名3个，第三名2个，4-10名1个，有效期7天）");
+}
+
+function runAntiCheat(){
+    
